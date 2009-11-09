@@ -1,0 +1,78 @@
+
+#include "xmldb.hpp"
+#include <stdexcept>
+#include <fstream>
+#include <iostream>
+#include <cstring>
+
+// ---------------------------------------------------------------------------
+// xmltable class
+
+#define BLOCKSIZE (4*1024*1024)
+
+xmltable::xmltable(const char *a_name, const char * const *a_columns)
+		: name(a_name), columns(), count(0), progress(100000) {
+	for (const char * const *col=a_columns; *col; col++) {
+		columns.push_back(*col);
+	}
+}
+
+void xmltable::load() {
+	std::cout << "loading " << name << std::endl;
+
+	XML_Parser parser = XML_ParserCreate("UTF-8");
+	if (!parser)
+		throw std::runtime_error("Can't create parser");
+	XML_SetUserData(parser, this);
+	XML_SetElementHandler(parser, &wrp_handle_element, 0);
+
+	std::ifstream f((name + ".xml").c_str());
+	char buffer[BLOCKSIZE];
+	do {
+		f.read(buffer, BLOCKSIZE);
+		XML_Parse(parser, buffer, f.gcount(), (f ? 0 : 1));
+	} while (f);
+
+	XML_ParserFree(parser);
+	std::cout << "  (got " << count << " datasets)" << std::endl;
+}
+
+void xmltable::handle_element(const XML_Char *tag, const XML_Char **attrs) {
+	if (std::strcmp(tag, "row") != 0)
+		return;
+	count++;
+	if (count % progress == 0)
+		std::cout << "  (... " << count << " datasets)" << std::endl;
+
+	beginrow();
+	size_t idx = 0;
+	for (const XML_Char **a = attrs; *a; a+=2) {
+		if (idx >= columns.size()) {
+			std::cerr << "unknown column in " << name << ": " << *a << std::endl;
+			return;
+		}
+		while (*a != columns[idx]) {
+			setcolumn(idx++, NULL);
+			if (idx >= columns.size()) {
+				std::cerr << "unknown column in " << name << ": " << *a << std::endl;
+				return;
+			}
+		}
+		setcolumn(idx++, *(a+1));
+	}
+	endrow();
+}
+
+int xmltable::column_index(const std::string &name) {
+	for (size_t i=0; i<columns.size(); i++) {
+		if (columns[i] == name)
+			return i;
+	}
+	throw std::logic_error("invalid column name: " + name);
+}
+
+extern "C"
+void wrp_handle_element(void *data, const XML_Char *tag, const XML_Char **attrs) {
+	reinterpret_cast<xmltable*>(data)->handle_element(tag, attrs);
+}
+
