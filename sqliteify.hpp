@@ -18,7 +18,7 @@ private:
 	int count;
 
 public:
-	tablebuilder(sqlite3 *a_db, const char *a_name, const char * const *a_columns);
+	tablebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns);
 	~tablebuilder();
 
 	int column_index(const std::string &name);

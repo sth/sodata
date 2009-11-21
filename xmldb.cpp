@@ -10,11 +10,8 @@
 
 #define BLOCKSIZE (4*1024*1024)
 
-xmltable::xmltable(const char *a_name, const char * const *a_columns)
-		: name(a_name), columns(), count(0), progress(100000) {
-	for (const char * const *col=a_columns; *col; col++) {
-		columns.push_back(*col);
-	}
+xmltable::xmltable(const char *a_name, const std::vector<std::string> &a_columns)
+		: name(a_name), columns(a_columns), count(0), progress(100000) {
 }
 
 void xmltable::load() {

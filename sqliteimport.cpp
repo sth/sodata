@@ -11,9 +11,10 @@
 class sqliteloader : private xmltable {
 private:
 	tablebuilder builder;
+	table_spec table;
 
 public:
-	sqliteloader(sqlite3 *a_db, const char *a_name, const char * const *a_columns);
+	sqliteloader(sqlite3 *a_db, const table_spec &a_table);
 	void load();
 
 protected:
@@ -22,9 +23,9 @@ protected:
 	virtual void endrow();
 };
 
-
-sqliteloader::sqliteloader(sqlite3 *a_db, const char *a_name, const char * const *a_columns)
-		: xmltable(a_name, a_columns), builder(a_db, a_name, a_columns) {
+sqliteloader::sqliteloader(sqlite3 *a_db, const table_spec &a_table)
+		: xmltable(a_table.name, a_table.column_names()),
+		  builder(a_db, a_table.name, a_table.column_names()), table(a_table) {
 }
 
 void sqliteloader::load() {
@@ -41,8 +42,54 @@ void sqliteloader::beginrow() {
 	builder.beginrow();
 }
 
+time_t parsedate(const char *value) {
+	// 2009-07-12T22:51:42.563
+	if (!value) {
+		std::cerr << "warning: date parse failed for NULL" << std::endl;
+		return 0;
+	}
+	tm t = {0};
+	const char *rem = strptime(value, "%Y-%m-%dT%H:%M:%S", &t);
+	if (!rem) {
+		rem = strptime(value, "%Y-%m-%d", &t);
+		if (!rem) {
+			std::cerr << "warning: date parse failed for '" << value << "'" << std::endl;
+			return 0;
+		}
+		else if (*rem != '\0') {
+			// error
+			std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
+			return 0;
+		}
+	}
+	else if (*rem != '.') {
+		// error
+		std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
+		return 0;
+	}
+	return timegm(&t);
+}
+
 void sqliteloader::setcolumn(int idx, const char *value) {
-	builder.setcolumn(idx, value);
+	if (!value) {
+		// NULL
+		builder.setcolumn(idx, value);
+		return;
+	}
+	switch (table.columns[idx].type) {
+	case CT_STR:
+		builder.setcolumn(idx, value);
+		break;
+	case CT_INT:
+		builder.setcolumn(idx, atoi(value));
+		break;
+	case CT_DATE:
+		builder.setcolumn(idx, static_cast<int>(parsedate(value)));
+		break;
+	default:
+		throw std::logic_error("invalid column type");
+		break;
+	}
 }
 
 void sqliteloader::endrow() {
@@ -65,7 +112,7 @@ int main(int argc, char *argv[]) {
 
 	// import all tables
 	for (size_t i=0; i<table_count; i++) {
-		sqliteloader t(db, tables[i].name, tables[i].columns);
+		sqliteloader t(db, tables[i]);
 		t.load();
 	}
 

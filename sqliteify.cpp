@@ -3,11 +3,8 @@
 #include <iostream>
 #include <stdexcept>
 
-tablebuilder::tablebuilder(sqlite3 *a_db, const char *a_name, const char * const *a_columns)
-		: db(a_db), prepared(NULL), name(a_name), columns(), count(0) {
-	for (const char * const *col=a_columns; *col; col++) {
-		columns.push_back(*col);
-	}
+tablebuilder::tablebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns)
+		: db(a_db), prepared(NULL), name(a_name), columns(a_columns), count(0) {
 	init();
 }
 

@@ -24,7 +24,7 @@ protected:
 public:
 	int progress;
 
-	xmltable(const char *a_name, const char * const *a_columns);
+	xmltable(const char *a_name, const std::vector<std::string> &a_columns);
 	void load();
 
 protected:
