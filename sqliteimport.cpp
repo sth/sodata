@@ -97,10 +97,52 @@ void sqliteloader::endrow() {
 }
 
 
+void create_indexes(sqlite3 *db) {
+	std::cout << "adding indexes" << std::endl;
+	for (size_t i=0; i<table_count; i++) {
+		const column_spec *columns = tables[i].columns;
+		for (size_t idx=0; columns[idx].name; idx++) {
+		switch (columns[idx].type) {
+			case CT_INT:
+			case CT_DATE: {
+				std::string indexname = std::string(tables[i].name) + "_" + columns[idx].name;
+				std::cout << "  " << indexname << std::endl;
+				int rv = sqlite3_exec(db, ("CREATE INDEX " + indexname + " ON " +
+						tables[i].name + " (" + columns[idx].name + ")").c_str(), 0, 0, 0);
+				if (rv != SQLITE_OK)
+					std::cerr << "adding index failed: (" << sqlite3_errmsg(db) << ")" << std::endl;
+				break;
+			}
+			default:
+				//assert(0);
+				break;
+			}
+		}
+	}
+}
+
+
 // ---------------------------------------------------------------------------
 // main
 
 int main(int argc, char *argv[]) {
+	bool indexes = true;
+	if (argc > 1) {
+		if (std::string("-I") == argv[1]) {
+			indexes = false;
+		}
+		else {
+			std::cerr << "unrecognized option: " << argv[1] << std::endl;
+			std::cout <<
+					"Start from directory with Stack Overflow database dump" <<
+					"Xml files to create a dump.db sqlite database." << std::endl <<
+					std::endl <<
+					"Options:" << std::endl <<
+					"  -I  Don't add indexes" << std::endl;
+			return 1;
+		}
+	}
+
 	int rv;
 	sqlite3 *db;
 	
@@ -115,6 +157,9 @@ int main(int argc, char *argv[]) {
 		sqliteloader t(db, tables[i]);
 		t.load();
 	}
+
+	if (indexes)
+		create_indexes(db);
 
 	rv = sqlite3_close(db);
 	if (rv != SQLITE_OK)
