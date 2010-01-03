@@ -2,33 +2,10 @@
 #if !defined(SOSCHEMA_HPP_INCLUDED)
 #define SOSCHEMA_HPP_INCLUDED
 
-#include <string>
-#include <vector>
+#include "dbspec.hpp"
 
 // ---------------------------------------------------------------------------
 // Table specifications
-
-enum column_type_t {
-	CT_STR,
-	CT_INT,
-	CT_DATE
-};
-
-struct column_spec {
-	const char *name;
-	column_type_t type;
-};
-
-struct table_spec {
-	const char *name;
-	const column_spec *columns;
-	std::vector<std::string> column_names() const {
-		std::vector<std::string> result;
-		for (size_t i=0; columns[i].name; i++)
-			result.push_back(columns[i].name);
-		return result;
-	}
-};
 
 namespace {
 
@@ -36,12 +13,12 @@ const column_spec users_columns[] =
 		{{"Id",             CT_INT},
 		 {"Reputation",     CT_INT},
 		 {"CreationDate",   CT_DATE},
-		 {"DisplayName",    CT_STR},
+		 {"DisplayName",    CT_VCHR64},
 		 {"LastAccessDate", CT_DATE},
-		 {"WebsiteUrl",     CT_STR},
-		 {"Location",       CT_STR},
+		 {"WebsiteUrl",     CT_TEXT},
+		 {"Location",       CT_TEXT},
 		 {"Age",            CT_INT},
-		 {"AboutMe",        CT_STR},
+		 {"AboutMe",        CT_TEXT},
 		 {"Views",          CT_INT},
 		 {"UpVotes",        CT_INT},
 		 {"DownVotes",      CT_INT},
@@ -51,7 +28,7 @@ const table_spec users_table = {"users", users_columns};
 const column_spec badges_columns[] =
 		{{"Id",             CT_INT},
 		 {"UserId",         CT_INT},
-		 {"Name",           CT_STR},
+		 {"Name",           CT_VCHR64},
 		 {"Date",           CT_DATE},
 		 {0}};
 const table_spec badges_table = {"badges", badges_columns};
@@ -74,16 +51,16 @@ const column_spec posts_columns[] =
 		 {"CreationDate",   CT_DATE},
 		 {"Score",          CT_INT},
 		 {"ViewCount",      CT_INT},
-		 {"Body",           CT_STR},
+		 {"Body",           CT_TEXT},
 		 {"OwnerUserId",    CT_INT},
 		 {"LastEditorUserId", CT_INT},
-		 {"LastEditorDisplayName", CT_STR},
+		 {"LastEditorDisplayName", CT_VCHR64},
 		 {"LastEditDate",   CT_DATE},
 		 {"LastActivityDate", CT_DATE},
 		 {"CommunityOwnedDate", CT_DATE},
 		 {"ClosedDate",     CT_DATE},
-		 {"Title",          CT_STR},
-		 {"Tags",           CT_STR},
+		 {"Title",          CT_TEXT},
+		 {"Tags",           CT_TEXT},
 		 {"AnswerCount",    CT_INT},
 		 {"CommentCount",   CT_INT},
 		 {"FavoriteCount",  CT_INT},
@@ -94,7 +71,7 @@ const column_spec comments_columns[] =
 		{{"Id",             CT_INT},
 		 {"PostId",         CT_INT},
 		 {"Score",          CT_INT},
-		 {"Text",           CT_STR},
+		 {"Text",           CT_TEXT},
 		 {"CreationDate",   CT_DATE},
 		 {"UserId",         CT_INT},
 		 {0}};
