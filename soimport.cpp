@@ -1,31 +1,8 @@
 
-#include "xmldb.hpp"
-#include "soschema.hpp"
+#include "soimport.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
-
-#if defined(USE_SQLITE)
-#include "sqlitebuilder.hpp"
-#endif
-#if defined(USE_PGSQL)
-#include "pgbuilder.hpp"
-#endif
-
-// ---------------------------------------------------------------------------
-// global config
-
-static struct {
-	bool indexes;
-#if defined(USE_PGSQL)
-	const char *connect;
-#endif
-} config = {
-	true,
-#if defined(USE_PGSQL)
-	""
-#endif
-};
 
 // ---------------------------------------------------------------------------
 // helper functions
@@ -62,21 +39,6 @@ time_t parsedate(const char *value) {
 // ---------------------------------------------------------------------------
 // soloader class
 
-class soloader : private xmltable {
-private:
-	tablebuilder &builder;
-	table_spec table;
-
-public:
-	soloader(tablebuilder &a_builder, const table_spec &a_table);
-	void load();
-
-protected:
-	virtual void beginrow();
-	virtual void setcolumn(int idx, const char *value);
-	virtual void endrow();
-	void add_indexes();
-};
 
 soloader::soloader(tablebuilder &a_builder, const table_spec &a_table)
 		: xmltable(a_table.name, a_table.column_names()),
@@ -89,8 +51,6 @@ void soloader::load() {
 	xmltable::load();
 	builder.committable();
 	builder.end_transaction();
-	if (config.indexes)
-		add_indexes();
 }
 
 void soloader::beginrow() {
@@ -139,78 +99,5 @@ void soloader::add_indexes() {
 			break;
 		}
 	}
-}
-
-// ---------------------------------------------------------------------------
-// main
-
-int main(int argc, char *argv[]) {
-	for (int i = 1; i < argc; i++) {
-		if      (strcmp("-h", argv[i]) == 0) {
-			std::cout <<
-					"Start from directory with Stack Overflow database dump" <<
-					"Xml files to create a dump.db sqlite database." << std::endl <<
-					std::endl <<
-					"Options:" << std::endl <<
-					"  -h           Display this help message" << std::endl <<
-					"  -I           Don't add indexes" << std::endl;
-#if defined(USE_PGSQL)
-			std::cout <<
-					"  -c CONNECT   Database connect string" << std::endl;
-#endif
-			return 0;
-		}
-		else if (strcmp("-I", argv[i]) == 0) {
-			config.indexes = false;
-		}
-#if defined(USE_PGSQL)
-		else if (strcmp("-c", argv[i]) == 0) {
-			if (i+1 >= argc) {
-				std::cerr << "missing argument after '-c'" << std::endl;
-				return 1;
-			}
-			config.connect = argv[++i];
-		}
-#endif
-		else {
-			std::cerr << "unrecognized option: " << argv[i] << std::endl;
-			std::cerr << "try -h for help" << std::endl;
-			return 1;
-		}
-	}
-
-#if defined(USE_SQLITE)
-	int rv;
-	sqlite3 *db;
-	
-	rv = sqlite3_open("dump.db", &db);
-	if (rv != SQLITE_OK) {
-		std::cerr << "cannot open db (" << sqlite3_errmsg(db) << ")" << std::endl;
-		return 1;
-	}
-#elif defined(USE_PGSQL)
-	pqxx::connection db(config.connect);
-#else
-#	error "No database engine specified"
-#endif
-
-	// import all tables
-	for (size_t i=0; i<table_count; i++) {
-		const table_spec &table = tables[i];
-#if   defined(USE_SQLITE)
-		sqlitebuilder builder(db, table.name, table.column_names());
-#elif defined(USE_PGSQL)
-		pgbuilder builder(&db, table.name, table.columns());
-#endif
-		soloader t(builder, table);
-		t.load();
-	}
-
-#if defined(USE_SQLITE)
-	rv = sqlite3_close(db);
-	if (rv != SQLITE_OK)
-		std::cerr << "cannot close db (" << sqlite3_errmsg(db) << ")" << std::endl;
-#endif
-	return 0;
 }
 

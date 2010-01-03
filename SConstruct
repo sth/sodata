@@ -12,20 +12,16 @@ AddOption('--no-pgsql', action='store_false', dest='use_sqlite',
 env = Environment()
 env.Append(CXXFLAGS = Split('-Wall -g -O2'), LIBS = ['expat'])
 
-objs = env.Object(['xmldb.cpp', 'soimport.cpp', 'dbspec.cpp'])
+commonobjs = env.Object(['xmldb.cpp', 'soimport.cpp', 'dbspec.cpp'])
 
-if GetOption('use_sqlite'):
-    print "using sqlite"
-    objs.extend(
-            env.Object(['sqlitebuilder.cpp'])
-        )
-    env.Append(CXXFLAGS = ['-DUSE_SQLITE'], LIBS = ['sqlite3'])
-if GetOption('use_pgsql'):
-    print "using pgsql"
-    objs.extend(
-            env.Object(['pgbuilder.cpp', 'csvbuilder.cpp'])
-        )
-    env.Append(CXXFLAGS = ['-DUSE_PGSQL'], LIBS = ['pqxx'])
+sqliteenv = env.Clone()
+sqliteenv.Append(LIBS = ['sqlite3'])
+sqliteobjs = sqliteenv.Object(['sqlitebuilder.cpp', 'sqliteimport.cpp'])
 
-env.Program('soimport', objs)
+pgenv = env.Clone()
+pgenv.Append(LIBS = ['pqxx'])
+pgobjs = pgenv.Object(['csvbuilder.cpp', 'pgbuilder.cpp', 'pgimport.cpp'])
+
+sqliteenv.Program('sqliteimport', commonobjs + sqliteobjs)
+pgenv.Program('pgimport', commonobjs + pgobjs)
 
