@@ -1,16 +1,19 @@
 
-CPPFLAGS=-O2 -Wall
+CPPFLAGS=-O2 -Wall -g -DUSE_SQLITE
 
-default: sqliteimport
+default: soimport
 
 xmldb.o: xmldb.cpp xmldb.hpp
 	g++ ${CPPFLAGS} -c xmldb.cpp
 
-sqliteify.o: sqliteify.cpp sqliteify.hpp
-	g++ ${CPPFLAGS} -c sqliteify.cpp
+sqlitebuilder.o: sqlitebuilder.cpp sqlitebuilder.hpp tablebuilder.hpp
+	g++ ${CPPFLAGS} -c sqlitebuilder.cpp
 
-sqliteimport: sqliteimport.cpp soschema.hpp xmldb.o sqliteify.o
-	g++ ${CPPFLAGS} -lexpat -lsqlite3 -o sqliteimport xmldb.o sqliteify.o sqliteimport.cpp
+soimport.o: soimport.cpp soschema.hpp sqlitebuilder.hpp tablebuilder.hpp
+	g++ ${CPPFLAGS} -c soimport.cpp
+
+soimport: soimport.o xmldb.o sqlitebuilder.o
+	g++ ${CPPFLAGS} -lexpat -lsqlite3 -o soimport xmldb.o sqlitebuilder.o soimport.o
 
 clean:
 	rm -f *.o sqliteimport

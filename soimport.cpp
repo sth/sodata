@@ -1,56 +1,36 @@
 
 #include "xmldb.hpp"
-#include "sqliteify.hpp"
 #include "soschema.hpp"
 #include <iostream>
 #include <stdexcept>
 
+#if defined(USE_SQLITE)
+#include "sqlitebuilder.hpp"
+#endif
+#if defined(USE_PGSQL)
+#include "pgbuilder.hpp"
+#endif
+
 // ---------------------------------------------------------------------------
-// sqliteloader class
+// global config
 
-class sqliteloader : private xmltable {
-private:
-	tablebuilder builder;
-	table_spec table;
+static struct {
+	bool indexes;
+} config = {true};
 
-public:
-	sqliteloader(sqlite3 *a_db, const table_spec &a_table);
-	void load();
-
-protected:
-	virtual void beginrow();
-	virtual void setcolumn(int idx, const char *value);
-	virtual void endrow();
-};
-
-sqliteloader::sqliteloader(sqlite3 *a_db, const table_spec &a_table)
-		: xmltable(a_table.name, a_table.column_names()),
-		  builder(a_db, a_table.name, a_table.column_names()), table(a_table) {
-}
-
-void sqliteloader::load() {
-	builder.begin_transaction();
-	xmltable::load();
-	builder.end_transaction();
-}
-
-void sqliteloader::beginrow() {
-	if (count % 100000 == 0) {
-		builder.end_transaction();
-		builder.begin_transaction();
-	}
-	builder.beginrow();
-}
+// ---------------------------------------------------------------------------
+// helper functions
 
 time_t parsedate(const char *value) {
-	// 2009-07-12T22:51:42.563
 	if (!value) {
 		std::cerr << "warning: date parse failed for NULL" << std::endl;
 		return 0;
 	}
 	tm t = {0};
+	// try 2009-07-12T22:51:42.563
 	const char *rem = strptime(value, "%Y-%m-%dT%H:%M:%S", &t);
 	if (!rem) {
+		// try 2009-07-12
 		rem = strptime(value, "%Y-%m-%d", &t);
 		if (!rem) {
 			std::cerr << "warning: date parse failed for '" << value << "'" << std::endl;
@@ -68,6 +48,47 @@ time_t parsedate(const char *value) {
 		return 0;
 	}
 	return timegm(&t);
+}
+
+// ---------------------------------------------------------------------------
+// sqliteloader class
+
+class sqliteloader : private xmltable {
+private:
+	tablebuilder &builder;
+	table_spec table;
+
+public:
+	sqliteloader(tablebuilder &a_builder, const table_spec &a_table);
+	void load();
+
+protected:
+	virtual void beginrow();
+	virtual void setcolumn(int idx, const char *value);
+	virtual void endrow();
+	void add_indexes();
+};
+
+sqliteloader::sqliteloader(tablebuilder &a_builder, const table_spec &a_table)
+		: xmltable(a_table.name, a_table.column_names()),
+		  builder(a_builder), table(a_table) {
+}
+
+void sqliteloader::load() {
+	std::cout << "loading " << name << std::endl;
+	builder.begin_transaction();
+	xmltable::load();
+	builder.end_transaction();
+	if (config.indexes)
+		add_indexes();
+}
+
+void sqliteloader::beginrow() {
+	if (count % 100000 == 0) {
+		builder.end_transaction();
+		builder.begin_transaction();
+	}
+	builder.beginrow();
 }
 
 void sqliteloader::setcolumn(int idx, const char *value) {
@@ -96,40 +117,26 @@ void sqliteloader::endrow() {
 	builder.commitrow();
 }
 
-
-void create_indexes(sqlite3 *db) {
-	std::cout << "adding indexes" << std::endl;
-	for (size_t i=0; i<table_count; i++) {
-		const column_spec *columns = tables[i].columns;
-		for (size_t idx=0; columns[idx].name; idx++) {
+void sqliteloader::add_indexes() {
+	const column_spec *columns = table.columns;
+	for (size_t idx=0; columns[idx].name; idx++) {
 		switch (columns[idx].type) {
-			case CT_INT:
-			case CT_DATE: {
-				std::string indexname = std::string(tables[i].name) + "_" + columns[idx].name;
-				std::cout << "  " << indexname << std::endl;
-				int rv = sqlite3_exec(db, ("CREATE INDEX " + indexname + " ON " +
-						tables[i].name + " (" + columns[idx].name + ")").c_str(), 0, 0, 0);
-				if (rv != SQLITE_OK)
-					std::cerr << "adding index failed: (" << sqlite3_errmsg(db) << ")" << std::endl;
-				break;
-			}
-			default:
-				//assert(0);
-				break;
-			}
+		case CT_INT:
+		case CT_DATE:
+			builder.add_index(columns[idx].name);
+		default:
+			break;
 		}
 	}
 }
-
 
 // ---------------------------------------------------------------------------
 // main
 
 int main(int argc, char *argv[]) {
-	bool indexes = true;
 	if (argc > 1) {
 		if (std::string("-I") == argv[1]) {
-			indexes = false;
+			config.indexes = false;
 		}
 		else {
 			std::cerr << "unrecognized option: " << argv[1] << std::endl;
@@ -154,12 +161,11 @@ int main(int argc, char *argv[]) {
 
 	// import all tables
 	for (size_t i=0; i<table_count; i++) {
-		sqliteloader t(db, tables[i]);
+		const table_spec &table = tables[i];
+		sqlitebuilder builder(db, table.name, table.column_names());
+		sqliteloader t(builder, table);
 		t.load();
 	}
-
-	if (indexes)
-		create_indexes(db);
 
 	rv = sqlite3_close(db);
 	if (rv != SQLITE_OK)

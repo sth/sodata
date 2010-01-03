@@ -15,8 +15,6 @@ xmltable::xmltable(const char *a_name, const std::vector<std::string> &a_columns
 }
 
 void xmltable::load() {
-	std::cout << "loading " << name << std::endl;
-
 	XML_Parser parser = XML_ParserCreate("UTF-8");
 	if (!parser)
 		throw std::runtime_error("Can't create parser");

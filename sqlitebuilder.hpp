@@ -1,12 +1,13 @@
 
-#if !defined(SQLITEIFY_HPP_INCLUDED)
-#define SQLITEIFY_HPP_INCLUDED
+#if !defined(SQLITEBUILDER_HPP_INCLUDED)
+#define SQLITEBUILDER_HPP_INCLUDED
 
+#include "tablebuilder.hpp"
 #include <sqlite3.h>
 #include <string>
 #include <vector>
 
-class tablebuilder {
+class sqlitebuilder : public tablebuilder {
 private:
 	sqlite3 *db;
 	sqlite3_stmt *prepared;
@@ -15,11 +16,9 @@ private:
 	typedef std::vector<std::string> columns_t;
 	columns_t columns;
 
-	int count;
-
 public:
-	tablebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns);
-	~tablebuilder();
+	sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns);
+	~sqlitebuilder();
 
 	int column_index(const std::string &name);
 	void begin_transaction();
@@ -33,14 +32,13 @@ public:
 	void setcolumn(int idx, double value);
 
 	void commitrow();
-	void rollbackrow();
+
+	void add_index(const std::string &column);
 
 private:
 	template<typename T>
 	void setcolumn_tmpl(int idx, T value);
-	void init();
-	void done();
 };
 
-#endif // SQLITEIFY_HPP_INCLUDED
+#endif // SQLITEBUILDER_HPP_INCLUDED
 
