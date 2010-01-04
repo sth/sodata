@@ -1,20 +1,26 @@
 
-CPPFLAGS=-O2 -Wall -g -DUSE_SQLITE
+CXX=g++
+CPPFLAGS=-O2 -Wall
+HEADS=csvbuilder.hpp pgbuilder.hpp soschema.hpp tablebuilder.hpp dbspec.hpp \
+		soimport.hpp sqlitebuilder.hpp xmldb.hpp 
 
-default: soimport
+default: sqliteimport pgimport pgcopyimport
 
-xmldb.o: xmldb.cpp xmldb.hpp
-	g++ ${CPPFLAGS} -c xmldb.cpp
+%.o: %.cpp ${HEADS}
+	${CXX} ${CPPFLAGS} -c $<
 
-sqlitebuilder.o: sqlitebuilder.cpp sqlitebuilder.hpp tablebuilder.hpp
-	g++ ${CPPFLAGS} -c sqlitebuilder.cpp
+SQLITEOBJS=soimport.o dbspec.o xmldb.o sqlitebuilder.o sqliteimport.o
+sqliteimport: ${SQLITEOBJS}
+	${CXX} ${CPPFLAGS} -lexpat -lsqlite3 -o sqliteimport ${SQLITEOBJS}
 
-soimport.o: soimport.cpp soschema.hpp sqlitebuilder.hpp tablebuilder.hpp
-	g++ ${CPPFLAGS} -c soimport.cpp
+PGOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o pgbuilder.o pgimport.o
+pgimport: ${PGOBJS}
+	${CXX} ${CPPFLAGS} -lexpat -lpqxx -o pgimport ${PGOBJS}
 
-soimport: soimport.o xmldb.o sqlitebuilder.o
-	g++ ${CPPFLAGS} -lexpat -lsqlite3 -o soimport xmldb.o sqlitebuilder.o soimport.o
+PGCOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o pgbuilder.o pgcopyimport.o
+pgcopyimport: ${PGCOBJS}
+	${CXX} ${CPPFLAGS} -lexpat -lpqxx -o pgcopyimport ${PGCOBJS}
 
 clean:
-	rm -f *.o sqliteimport
+	rm -f *.o sqliteimport pgimport pgcopyimport
 

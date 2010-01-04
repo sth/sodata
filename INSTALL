@@ -1,0 +1,37 @@
+
+Dependencies
+============
+
+Required libraries:
+- libexpat
+- libsqlite3 (for sqliteimport)
+- libpqxx (for pgimport, pgcopyimport)
+
+Libraries are needed to run the programs. Additionally their development
+headers to build them. For compilation also a C++ compiler is necessary.
+
+
+Build
+=====
+
+Recommended is to build with scons.
+Build all:
+  $ scons
+
+Build just one target:
+  $ scons sqliteimport
+
+Optionally you can also build with make.
+Build all:
+  $ make
+
+Build just one target:
+  $ make sqliteimport
+
+
+Install
+=======
+
+Manually copy the resulting binaries to whereever you would like to have them
+installed.
+
