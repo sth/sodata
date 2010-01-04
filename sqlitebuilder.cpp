@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 sqlitebuilder::sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns)
-		: db(a_db), prepared(NULL), name(a_name), columns(a_columns) {
+		: db(a_db), prepared(NULL), cur_index(0), row_count(0), name(a_name), columns(a_columns) {
 	int rv;
 
 	std::string drop = "DROP TABLE IF EXISTS " + name + ";";
@@ -36,6 +36,7 @@ sqlitebuilder::~sqlitebuilder() {
 	sqlite3_finalize(prepared);
 }
 
+/*
 int sqlitebuilder::column_index(const std::string &name) {
 	for (size_t i=0; i<columns.size(); i++) {
 		if (columns[i] == name)
@@ -43,17 +44,18 @@ int sqlitebuilder::column_index(const std::string &name) {
 	}
 	throw std::logic_error("invalid column name: " + name);
 }
+*/
 
 void sqlitebuilder::begin_transaction() {
-	int rv = sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
+	int rv = sqlite3_exec(db, "BEGIN;", 0, 0, 0);
 	if (rv != SQLITE_OK)
 		std::cerr << "can't begin transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
 }
 
 void sqlitebuilder::end_transaction() {
-	int rv = sqlite3_exec(db, "END TRANSACTION;", 0, 0, 0);
+	int rv = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
 	if (rv != SQLITE_OK)
-		std::cerr << "can't end transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
+		std::cerr << "can't commit transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
 }
 
 int sqlite3_bind_any(sqlite3_stmt* s, int i, const char *v) {
@@ -78,42 +80,55 @@ int sqlite3_bind_any(sqlite3_stmt* s, int i, double v) {
 // now that's a case where a simple copy & paste would probably have been
 // better...
 template<typename T>
-void sqlitebuilder::setcolumn_tmpl(int idx, T value){
+void sqlitebuilder::add_column_tmpl(T value){
 	int rv;
-	rv = sqlite3_bind_any(prepared, idx+1, value);
+	rv = sqlite3_bind_any(prepared, ++cur_index, value);
 	if (rv != SQLITE_OK)
 		std::cerr << "can't bind parameter in " << name <<
 				" (" << sqlite3_errmsg(db) << "), value '" << value << "'" <<
 				std::endl;
 }
 
-void sqlitebuilder::setcolumn(int idx, const char *value) {
-	return setcolumn_tmpl(idx, value);
+void sqlitebuilder::add_column(const char *value) {
+	return add_column_tmpl(value);
 }
 
-void sqlitebuilder::setcolumn(int idx, const std::string &value) {
-	return setcolumn_tmpl(idx, value);
+void sqlitebuilder::add_column(const std::string &value) {
+	return add_column_tmpl(value);
 }
 
-void sqlitebuilder::setcolumn(int idx, int value) {
-	return setcolumn_tmpl(idx, value);
+void sqlitebuilder::add_column(int value) {
+	return add_column_tmpl(value);
 }
 
-void sqlitebuilder::setcolumn(int idx, double value) {
-	return setcolumn_tmpl(idx, value);
+void sqlitebuilder::add_column(double value) {
+	return add_column_tmpl(value);
 }
 
-void sqlitebuilder::beginrow() {
+void sqlitebuilder::open_table() {
+	begin_transaction();
+}
+
+void sqlitebuilder::table_complete() {
+	end_transaction();
+}
+
+void sqlitebuilder::open_row() {
 	int rv;
+	if (++row_count % 100000 == 0) {
+		end_transaction();
+		begin_transaction();
+	}
 	rv = sqlite3_reset(prepared);
 	if (rv != SQLITE_OK)
 		std::cerr << "sqlite3_reset: (" << sqlite3_errmsg(db) << ")" << std::endl;
 	rv = sqlite3_clear_bindings(prepared);
 	if (rv != SQLITE_OK)
 		std::cerr << "sqlite3_clear_bindings: (" << sqlite3_errmsg(db) << ")" << std::endl;
+	cur_index = 0;
 }
 
-void sqlitebuilder::commitrow() {
+void sqlitebuilder::row_complete() {
 	int rv = sqlite3_step(prepared);
 	if (rv != SQLITE_DONE)
 		std::cerr << "sqlite3_step: (" << sqlite3_errmsg(db) << ")" << std::endl;

@@ -14,51 +14,52 @@ std::string csvescape(std::string value) {
 }
 
 csvbuilder::csvbuilder(const char *name, int a_column_count)
-		: csv(), cur_column(0), column_count(a_column_count) {
+		: csv(), first_column(true) {
+
 	csv.open(name);
 }
 
-void csvbuilder::beginrow() {
-	cur_column = 0;
+void csvbuilder::open_table() {
 }
 
-template<typename T>
-void csvbuilder::setcolumn_tmpl(int idx, const T &data) {
-	assert(cur_column <= idx);
-	while (cur_column < idx) {
-		csv << ",";
-		cur_column++;
-	}
-	csv << data;
+void csvbuilder::table_complete() {
+	csv.close();
 }
 
-void csvbuilder::setcolumn(int idx, const std::string &value) {
-	setcolumn_tmpl(idx, csvescape(value));
+void csvbuilder::open_row() {
+	first_column = true;
 }
 
-void csvbuilder::setcolumn(int idx, const char *value) {
-	if (value)
-		setcolumn(idx, std::string(value));
-	else
-		setcolumn_tmpl(idx, nullstr);
-}
-
-void csvbuilder::setcolumn(int idx, int value) {
-	setcolumn_tmpl(idx, value);
-}
-
-void csvbuilder::setcolumn(int idx, double value) {
-	setcolumn_tmpl(idx, value);
-}
-
-void csvbuilder::commitrow() {
-	while (cur_column+1 < column_count) {
-		setcolumn_tmpl(cur_column+1, nullstr);
-	}
+void csvbuilder::row_complete() {
 	csv << "\n";
 }
 
-void csvbuilder::committable() {
-	csv.close();
+
+template<typename T>
+void csvbuilder::add_column_tmpl(const T &data) {
+	if (first_column)
+		first_column = false;
+	else
+		csv << ",";
+	csv << data;
+}
+
+void csvbuilder::add_column(const std::string &value) {
+	add_column_tmpl(csvescape(value));
+}
+
+void csvbuilder::add_column(const char *value) {
+	if (value)
+		add_column(std::string(value));
+	else
+		add_column_tmpl(nullstr);
+}
+
+void csvbuilder::add_column(int value) {
+	add_column_tmpl(value);
+}
+
+void csvbuilder::add_column(double value) {
+	add_column_tmpl(value);
 }
 

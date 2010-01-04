@@ -9,24 +9,23 @@
 class csvbuilder : public tablebuilder {
 private:
 	std::ofstream csv;
-	int cur_column;
-	int column_count;
+	bool first_column;
 
 public:
 	csvbuilder(const char *name, const int column_count);
 
-	void beginrow();
-	void setcolumn(int idx, const char *value);
-	void setcolumn(int idx, const std::string &value);
-	void setcolumn(int idx, int value);
-	void setcolumn(int idx, double value);
-
-	void commitrow();
-	void committable();
+	virtual void open_table();
+	virtual void table_complete();
+	virtual void open_row();
+	virtual void row_complete();
+	virtual void add_column(const char *value);
+	virtual void add_column(const std::string &value);
+	virtual void add_column(int value);
+	virtual void add_column(double value);
 
 private:
 	template<typename T>
-	void setcolumn_tmpl(int idx, const T &data);
+	void add_column_tmpl(const T &data);
 };
 
 #endif // SQLITEIFY_HPP_INCLUDED

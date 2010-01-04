@@ -24,13 +24,15 @@ int main(int argc, char *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		if      (strcmp("-h", argv[i]) == 0) {
 			std::cout <<
-					"Start from directory with Stack Overflow database dump" <<
-					"Xml files to create a dump.db sqlite database." << std::endl <<
+					"Start from directory with Stack Overflow database dump " <<
+					"Xml files to fill a postgresql database with the dump.\n" <<
+					"This program creates temporary text files in /var/tmp "
+					"contining the data and then loads it into the dpecified " <<
+					"database with \"COPY FROM 'file'\"." << std::endl <<
 					std::endl <<
-					"Options:" << std::endl <<
+					"Options:\n" << std::endl <<
 					"  -h           Display this help message" << std::endl <<
-					"  -I           Don't add indexes" << std::endl;
-			std::cout <<
+					"  -I           Don't add indexes" << std::endl <<
 					"  -c CONNECT   Database connect string" << std::endl;
 			return 0;
 		}
@@ -56,7 +58,7 @@ int main(int argc, char *argv[]) {
 	// import all tables
 	for (size_t i=0; i<table_count; i++) {
 		const table_spec &table = tables[i];
-		pgbuilder builder(&db, table.name, table.columns());
+		pgcopybuilder builder(db, table.name, table.columns());
 		soloader t(builder, table);
 		t.load();
 		if (config.indexes)

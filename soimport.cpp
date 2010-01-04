@@ -39,44 +39,38 @@ time_t parsedate(const char *value) {
 // ---------------------------------------------------------------------------
 // soloader class
 
-
 soloader::soloader(tablebuilder &a_builder, const table_spec &a_table)
-		: xmltable(a_table.name, a_table.column_names()),
+		: xmltable(a_table.name, a_table.columns()),
 		  builder(a_builder), table(a_table) {
 }
 
 void soloader::load() {
 	std::cout << "loading " << name << std::endl;
-	builder.begin_transaction();
+	builder.open_table();
 	xmltable::load();
-	builder.committable();
-	builder.end_transaction();
+	builder.table_complete();
 }
 
-void soloader::beginrow() {
-	if (count % 100000 == 0) {
-		builder.end_transaction();
-		builder.begin_transaction();
-	}
-	builder.beginrow();
+void soloader::open_row() {
+	builder.open_row();
 }
 
-void soloader::setcolumn(int idx, const char *value) {
+void soloader::add_column(const column_spec &col, const char *value) {
 	if (!value) {
 		// NULL
-		builder.setcolumn(idx, value);
+		builder.add_column(value);
 		return;
 	}
-	switch (table.column_defs[idx].type) {
+	switch (col.type) {
 	case CT_VCHR64:
 	case CT_TEXT:
-		builder.setcolumn(idx, value);
+		builder.add_column(value);
 		break;
 	case CT_INT:
-		builder.setcolumn(idx, atoi(value));
+		builder.add_column(atoi(value));
 		break;
 	case CT_DATE:
-		builder.setcolumn(idx, static_cast<int>(parsedate(value)));
+		builder.add_column(static_cast<int>(parsedate(value)));
 		break;
 	default:
 		throw std::logic_error("invalid column type");
@@ -84,8 +78,8 @@ void soloader::setcolumn(int idx, const char *value) {
 	}
 }
 
-void soloader::endrow() {
-	builder.commitrow();
+void soloader::row_complete() {
+	builder.row_complete();
 }
 
 void soloader::add_indexes() {
@@ -94,6 +88,7 @@ void soloader::add_indexes() {
 		switch (columns[idx].type) {
 		case CT_INT:
 		case CT_DATE:
+			std::cout << "  (indexing " << columns[idx].name << " ...)" << std::endl;
 			builder.add_index(columns[idx].name);
 		default:
 			break;

@@ -11,6 +11,8 @@ class sqlitebuilder : public tablebuilder {
 private:
 	sqlite3 *db;
 	sqlite3_stmt *prepared;
+	int cur_index;
+	int row_count;
 
 	std::string name;
 	typedef std::vector<std::string> columns_t;
@@ -20,24 +22,24 @@ public:
 	sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns);
 	~sqlitebuilder();
 
-	int column_index(const std::string &name);
-	void begin_transaction();
-	void end_transaction();
+	virtual void open_table();
+	virtual void table_complete();
 
-	void beginrow();
+	virtual void open_row();
+	virtual void row_complete();
 
-	void setcolumn(int idx, const char *value);
-	void setcolumn(int idx, const std::string &value);
-	void setcolumn(int idx, int value);
-	void setcolumn(int idx, double value);
+	virtual void add_column(const char *value);
+	virtual void add_column(const std::string &value);
+	virtual void add_column(int value);
+	virtual void add_column(double value);
 
-	void commitrow();
-
-	void add_index(const std::string &column);
+	virtual void add_index(const std::string &column);
 
 private:
 	template<typename T>
-	void setcolumn_tmpl(int idx, T value);
+	void add_column_tmpl(T value);
+	void begin_transaction();
+	void end_transaction();
 };
 
 #endif // SQLITEBUILDER_HPP_INCLUDED

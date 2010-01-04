@@ -17,9 +17,9 @@ public:
 	void add_indexes();
 
 protected:
-	virtual void beginrow();
-	virtual void setcolumn(int idx, const char *value);
-	virtual void endrow();
+	virtual void open_row();
+	virtual void add_column(const column_spec &col, const char *value);
+	virtual void row_complete();
 };
 
 #endif // SOIMPORT_HPP_INCLUDED
