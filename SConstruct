@@ -1,14 +1,4 @@
 
-AddOption('--sqlite', action='store_true', dest='use_sqlite', default=True,
-        help="Add sqlite support [default]")
-AddOption('--no-sqlite', action='store_false', dest='use_sqlite',
-        help="Don't add sqlite support")
-AddOption('--pgsql', action='store_true', dest='use_pgsql', default=False,
-        help="Add postgresql support")
-AddOption('--no-pgsql', action='store_false', dest='use_sqlite',
-        help="Don't add postresql support [default]")
-
-
 env = Environment()
 env.Append(CXXFLAGS = Split('-Wall -O2'), LIBS = ['expat'])
 
