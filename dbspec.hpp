@@ -24,6 +24,7 @@ struct table_spec {
 	const column_spec *column_defs;
 	std::vector<column_spec> columns() const;
 	std::vector<std::string> column_names() const;
+	size_t column_index(const std::string &name) const;
 };
 
 #endif // DBSPEC_HPP_INCLUDED
