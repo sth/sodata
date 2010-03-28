@@ -8,16 +8,14 @@ sqliteenv = env.Clone()
 sqliteenv.Append(LIBS = ['sqlite3'])
 sqliteobjs = sqliteenv.Object(['sqlitebuilder.cpp', 'sqliteimport.cpp'])
 
+sqliteenv.Program('sqliteimport', commonobjs + sqliteobjs)
+
 pgenv = env.Clone()
 pgenv.Append(LIBS = ['pqxx'])
 pgobjs = pgenv.Object(['csvbuilder.cpp', 'pgbuilder.cpp'])
 
-sqliteenv.Program('sqliteimport', commonobjs + sqliteobjs)
-
 pgiobjs = pgenv.Object('pgimport.cpp')
 pgenv.Program('pgimport', commonobjs + pgobjs + pgiobjs)
-pgicobjs = pgenv.Object('pgcopyimport.cpp')
-pgenv.Program('pgcopyimport', commonobjs + pgobjs + pgicobjs)
 
 env.Append(TARFLAGS = ['-z'])
 env.Tar('soimport.tar.gz', ['sqliteimport', 'pgimport'])
