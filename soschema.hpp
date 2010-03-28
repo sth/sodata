@@ -13,7 +13,8 @@ const column_spec users_columns[] =
 		{{"Id",             CT_INT},
 		 {"Reputation",     CT_INT},
 		 {"CreationDate",   CT_DATE},
-		 {"DisplayName",    CT_VCHR64},
+		 {"DisplayName",    CT_VCHR64}, // 32 would also be enough
+		 {"EmailHash",      CT_TEXT},
 		 {"LastAccessDate", CT_DATE},
 		 {"WebsiteUrl",     CT_TEXT},
 		 {"Location",       CT_TEXT},
