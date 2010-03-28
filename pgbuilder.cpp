@@ -41,8 +41,10 @@ pgcommon::pgcommon(pqxx::connection &a_db, const char *a_name, const columns_t &
 			create += "text";
 			break;
 		case CT_INT:
-		case CT_DATE:
 			create += "int";
+			break;
+		case CT_DATE:
+			create += "timestamp";
 			break;
 		default:
 			throw std::runtime_error("Unsupported column type");
