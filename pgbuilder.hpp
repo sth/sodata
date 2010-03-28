@@ -8,7 +8,15 @@
 #include <vector>
 #include <pqxx/connection>
 #include <pqxx/transaction>
-#include <pqxx/prepared_statement>
+
+// The implementation from the library never uses the const char* overload
+// defined there due to unnecessary and unused templating
+
+namespace pqxx { namespace internal {
+	PGSTD::string EscapeAny(const char s[], const PGSTD::string &null);
+} }
+
+#include <pqxx/tablewriter>
 
 class pgcommon {
 protected:

@@ -3,6 +3,19 @@
 #include <iostream>
 
 // ---------------------------------------------------------------------------
+// fix pqxx tablewriter escaping overloads (hacky)
+
+namespace pqxx {
+namespace internal {
+
+inline PGSTD::string EscapeAny(const char s[], const PGSTD::string &null) { 
+	return s ? Escape(PGSTD::string(s),null):"\\N";
+}
+
+}
+}
+
+// ---------------------------------------------------------------------------
 // pgcommon
 
 pgcommon::pgcommon(pqxx::connection &a_db, const char *a_name, const columns_t &a_columns)
