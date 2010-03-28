@@ -86,6 +86,12 @@ const table_spec tables[table_count] = {
 	comments_table
 };
 
+const column_spec tags_columns[] =
+		{{"PostId",         CT_INT},
+		 {"Name",           CT_VCHR64},
+		 {0}};
+const table_spec tags_table = {"tags", tags_columns};
+
 } // namepace
 
 #endif // SOSCHEMA_HPP_INCLUDED
