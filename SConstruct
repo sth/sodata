@@ -19,3 +19,6 @@ pgenv.Program('pgimport', commonobjs + pgobjs + pgiobjs)
 pgicobjs = pgenv.Object('pgcopyimport.cpp')
 pgenv.Program('pgcopyimport', commonobjs + pgobjs + pgicobjs)
 
+env.Append(TARFLAGS = ['-z'])
+env.Tar('soimport.tar.gz', ['sqliteimport', 'pgimport'])
+
