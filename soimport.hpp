@@ -7,7 +7,7 @@
 #include "dbspec.hpp"
 
 class soloader : private xmltable {
-private:
+protected:
 	tablebuilder &builder;
 	table_spec table;
 
@@ -21,6 +21,28 @@ protected:
 	virtual void add_column(const column_spec &col, const char *value);
 	virtual void row_complete();
 };
+
+struct config_t {
+	bool indexes;
+	bool tags;
+	bool urls;
+	std::string connect;
+	std::string tempdir;
+	std::string dbfile;
+	config_t() : indexes(true), tags(true), urls(false),
+			connect(), tempdir(), dbfile() {
+	}
+};
+
+extern config_t config;
+
+enum configset_t {
+	CS_PG,
+	CS_SQLITE
+};
+
+void parse_config(configset_t cs, int argc, char **argv);
+void import_tables(tablebuilder &builder);
 
 #endif // SOIMPORT_HPP_INCLUDED
 

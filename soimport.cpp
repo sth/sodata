@@ -1,40 +1,12 @@
 
 #include "soimport.hpp"
+#include "soschema.hpp"
 #include <iostream>
+#include <map>
+#include <sstream>
 #include <stdexcept>
 #include <cstring>
-
-// ---------------------------------------------------------------------------
-// helper functions
-
-time_t parsedate(const char *value) {
-	if (!value) {
-		std::cerr << "warning: date parse failed for NULL" << std::endl;
-		return 0;
-	}
-	tm t = {0};
-	// try 2009-07-12T22:51:42.563
-	const char *rem = strptime(value, "%Y-%m-%dT%H:%M:%S", &t);
-	if (!rem) {
-		// try 2009-07-12
-		rem = strptime(value, "%Y-%m-%d", &t);
-		if (!rem) {
-			std::cerr << "warning: date parse failed for '" << value << "'" << std::endl;
-			return 0;
-		}
-		else if (*rem != '\0') {
-			// error
-			std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
-			return 0;
-		}
-	}
-	else if (*rem != '.') {
-		// error
-		std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
-		return 0;
-	}
-	return timegm(&t);
-}
+#include <cassert>
 
 // ---------------------------------------------------------------------------
 // soloader class
@@ -46,7 +18,7 @@ soloader::soloader(tablebuilder &a_builder, const table_spec &a_table)
 
 void soloader::load() {
 	std::cout << "loading " << name << std::endl;
-	builder.open_table();
+	builder.open_table(table);
 	xmltable::load();
 	builder.table_complete();
 }
@@ -56,26 +28,7 @@ void soloader::open_row() {
 }
 
 void soloader::add_column(const column_spec &col, const char *value) {
-	if (!value) {
-		// NULL
-		builder.add_column(value);
-		return;
-	}
-	switch (col.type) {
-	case CT_VCHR64:
-	case CT_TEXT:
-		builder.add_column(value);
-		break;
-	case CT_INT:
-		builder.add_column(atoi(value));
-		break;
-	case CT_DATE:
-		builder.add_column(static_cast<int>(parsedate(value)));
-		break;
-	default:
-		throw std::logic_error("invalid column type");
-		break;
-	}
+	builder.add_column(col, value);
 }
 
 void soloader::row_complete() {
@@ -88,10 +41,281 @@ void soloader::add_indexes() {
 		switch (columns[idx].type) {
 		case CT_INT:
 		case CT_DATE:
-			std::cout << "  (indexing " << columns[idx].name << " ...)" << std::endl;
+			std::cout << "  (indexing " << columns[idx].name << "...)" << std::endl;
 			builder.add_index(columns[idx].name);
 		default:
 			break;
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// sopostloader class
+
+class sopostloader : public soloader {
+private:
+	typedef std::vector< std::pair<int, std::string> > tags_t;
+	tags_t tags;
+
+#ifdef UNDEF
+	int urls_lastid;
+	typedef std::map<std::string, int> urls_t;
+	urls_t urls;
+	idrefs_t posturls;
+#endif
+
+	int plidx_cur, plidx_id, plidx_posttypeid, plidx_tags, plidx_body;
+	int pl_curid, pl_curposttype;
+
+public:
+	sopostloader(tablebuilder &a_builder, const table_spec &a_table);
+	virtual void open_row();
+	virtual void add_column(const column_spec &col, const char *value);
+
+	void write_urls(const table_spec &spec);
+	void write_posturls(const table_spec &spec);
+	void write_tags(const table_spec &spec);
+	//void write_posttags(const table_spec &spec);
+};
+
+sopostloader::sopostloader(tablebuilder &a_builder, const table_spec &a_table)
+		: soloader(a_builder, a_table), tags() {
+	plidx_id = a_table.column_index("Id");
+	plidx_posttypeid = a_table.column_index("PostTypeId");
+	plidx_tags = a_table.column_index("Tags");
+	plidx_body = a_table.column_index("Body");
+}
+
+void sopostloader::open_row() {
+	soloader::open_row();
+	plidx_cur = -1;
+	pl_curid = 0;
+	pl_curposttype = 0;
+}
+
+void sopostloader::add_column(const column_spec &col, const char *value) {
+	soloader::add_column(col, value);
+
+	plidx_cur++;
+	if (!value)
+		return;
+
+	if (plidx_cur == plidx_id) {
+		pl_curid = atoi(value);
+	}
+	else if (plidx_cur == plidx_posttypeid) {
+		pl_curposttype = atoi(value);
+	}
+	else if (config.tags && (plidx_cur == plidx_tags) && (pl_curposttype == 1)) {
+		std::string tname(value);
+		size_t s, e;
+		s = 0;
+		while (s < tname.length()) {
+			e = tname.find('>', s);
+			if ((tname[s] != '<') || (e == tname.npos)) {
+				std::cerr << "invalid tags: " << tname << std::endl;
+				break;
+			}
+			std::string tag(tname.substr(s+1, e-s-1));
+			tags.push_back(std::make_pair(pl_curid, tag));
+			s = e + 1;
+		}
+	}
+	else if (config.urls && (plidx_cur == plidx_body) && (pl_curposttype == 2)) {
+	}
+}
+
+class dbvalue {
+	std::string value;
+public:
+	template<typename T>
+	dbvalue(T val) {
+		std::ostringstream fmt;
+		fmt << val;
+		value = fmt.str();
+	}
+	const char* get() {
+		return value.c_str();
+	}
+};
+
+#ifdef UNDEF
+void sopostloader::write_urls(const table_spec &spec) {
+	std::cout << "writing " << spec.name << std::endl;
+	builder.open_table(spec);
+	std::vector<column_spec> columns = spec.columns();
+	int counter(0);
+	for (urls_t::iterator it = urls.begin(); it != urls.end(); ++it) {
+		if (++counter % 100000 == 0)
+			std::cout << "  (" << counter << " datasets)" << std::endl;
+		builder.open_row();
+		dbvalue id(it->second);
+		builder.add_column(columns[0], id.get());
+		builder.add_column(columns[1], it->first.c_str());
+		builder.row_complete();
+	}
+	std::cout << "  (" << counter << " datasets)" << std::endl;
+	builder.table_complete();
+	if (config.indexes) {
+		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
+		builder.add_index(columns[0].name);
+		std::cout << "  (indexing " << columns[1].name << "...)" << std::endl;
+		builder.add_index(columns[1].name);
+	}
+}
+
+void sopostloader::write_posturls(const table_spec &spec) {
+	std::cout << "writing " << spec.name << std::endl;
+	std::vector<column_spec> columns = spec.columns();
+	builder.open_table(spec);
+	int counter(0);
+	for (idrefs_t::iterator it = posturls.begin(); it != posturls.end(); ++it) {
+		if (++counter % 100000 == 0)
+			std::cout << "  (" << counter << " datasets)" << std::endl;
+		builder.open_row();
+		dbvalue postid(it->first);
+		builder.add_column(columns[0], postid.get());
+		dbvalue urlid(it->second);
+		builder.add_column(columns[1], urlid.get());
+		builder.row_complete();
+	}
+	std::cout << "  (" << counter << " datasets)" << std::endl;
+	builder.table_complete();
+	if (config.indexes) {
+		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
+		builder.add_index(columns[0].name);
+		std::cout << "  (indexing " << columns[1].name << "...)" << std::endl;
+		builder.add_index(columns[1].name);
+	}
+}
+#endif
+
+void sopostloader::write_tags(const table_spec &spec) {
+	std::cout << "writing " << spec.name << std::endl;
+	std::vector<column_spec> columns = spec.columns();
+	builder.open_table(spec);
+	int counter(0);
+	for (tags_t::iterator it = tags.begin(); it != tags.end(); ++it) {
+		if (++counter % 100000 == 0)
+			std::cout << "  (" << counter << " datasets)" << std::endl;
+		builder.open_row();
+		dbvalue id(it->first);
+		builder.add_column(columns[0], id.get());
+		builder.add_column(columns[1], it->second.c_str());
+		builder.row_complete();
+	}
+	std::cout << "  (" << counter << " datasets)" << std::endl;
+	builder.table_complete();
+	if (config.indexes) {
+		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
+		builder.add_index(columns[0].name);
+		std::cout << "  (indexing " << columns[1].name << "...)" << std::endl;
+		builder.add_index(columns[1].name);
+	}
+}
+
+// ---------------------------------------------------------------------------
+// utility functions
+
+void load_standard_table(tablebuilder &builder, const table_spec &table) {
+	soloader loader(builder, table);
+	loader.load();
+	if (config.indexes) {
+		loader.add_indexes();
+	}
+}
+
+void import_tables(tablebuilder &builder) {
+	// import all tables
+	load_standard_table(builder, users_table);
+	load_standard_table(builder, badges_table);
+	load_standard_table(builder, votes_table);
+	load_standard_table(builder, comments_table);
+
+	sopostloader loader(builder, posts_table);
+	loader.load();
+	if (config.indexes) {
+		loader.add_indexes();
+	}
+#ifdef UNDEF
+	if (config.urls) {
+		//loader.write_urls():
+	}
+#endif
+	if (config.tags) {
+		loader.write_tags(tags_table);
+	}
+}
+
+
+// ---------------------------------------------------------------------------
+// configuration
+
+config_t config;
+
+void parse_config(configset_t cs, int argc, char **argv) {
+	for (int i = 1; i < argc; i++) {
+		if      (strcmp("-h", argv[i]) == 0) {
+			std::cout <<
+					"Start from directory with Stack Overflow database dump" <<
+					"Xml files to create a dump.db sqlite database." << std::endl <<
+					std::endl <<
+					"Options:" << std::endl <<
+					"  -h           Display this help message" << std::endl <<
+					"  -I           Don't add indexes" << std::endl <<
+					"  -T           Don't add a tags table" << std::endl;
+			switch (cs) {
+			case CS_PG:
+				std::cout <<
+					"  -c CONNECT   Database connect string/filename" << std::endl <<
+					"  -i DIRNAME   Use temporary files in this directory" << std::endl;
+				break;
+			case CS_SQLITE:
+				std::cout <<
+					"  -f FILENAME  Name of database file" << std::endl;
+				break;
+			default:
+				assert(0);
+			}
+#ifdef UNDEF
+					"  -U           Don't add a urls table" << std::endl <<
+#endif
+			exit(0);
+		}
+		else if (strcmp("-I", argv[i]) == 0) {
+			config.indexes = false;
+		}
+		else if (strcmp("-T", argv[i]) == 0) {
+			config.tags = false;
+		}
+		else if (strcmp("-U", argv[i]) == 0) {
+			config.urls = false;
+		}
+		else if (strcmp("-c", argv[i]) == 0) {
+			if (i+1 >= argc) {
+				std::cerr << "missing argument after '-c'" << std::endl;
+				exit(1);
+			}
+			config.connect = argv[++i];
+		}
+		else if (strcmp("-i", argv[i]) == 0) {
+			if (i+1 >= argc) {
+				std::cerr << "missing argument after '-i'" << std::endl;
+				exit(1);
+			}
+			config.tempdir = argv[++i];
+		}
+		else if (strcmp("-f", argv[i]) == 0) {
+			if (i+1 >= argc) {
+				std::cerr << "missing argument after '-f'" << std::endl;
+				exit(1);
+			}
+			config.dbfile = argv[++i];
+		}
+		else {
+			std::cerr << "unrecognized option: " << argv[i] << std::endl;
+			std::cerr << "try -h for help" << std::endl;
+			exit(1);
 		}
 	}
 }
