@@ -8,26 +8,27 @@
 
 class csvbuilder : public tablebuilder {
 private:
+	std::string outdir;
 	std::ofstream csv;
 	bool first_column;
 
 public:
-	csvbuilder(const char *name, const int column_count);
+	csvbuilder(const std::string &a_outdir);
 
-	virtual void open_table();
+	virtual void open_table(const table_spec &a_spec);
 	virtual void table_complete();
 	virtual void open_row();
 	virtual void row_complete();
-	virtual void add_column(const char *value);
-	virtual void add_column(const std::string &value);
-	virtual void add_column(int value);
-	virtual void add_column(double value);
+	virtual void add_column(const column_spec &spec, const char *value);
+
+protected:
+	std::string filename(const table_spec &spec) const;
 
 private:
 	template<typename T>
 	void add_column_tmpl(const T &data);
 };
 
-#endif // SQLITEIFY_HPP_INCLUDED
+#endif // CSVBUILDER_HPP_INCLUDED
 
 

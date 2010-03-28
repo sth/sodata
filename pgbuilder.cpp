@@ -18,20 +18,25 @@ inline PGSTD::string EscapeAny(const char s[], const PGSTD::string &null) {
 // ---------------------------------------------------------------------------
 // pgcommon
 
-pgcommon::pgcommon(pqxx::connection &a_db, const char *a_name, const columns_t &a_columns)
-		: db(a_db), name(a_name), columns(a_columns) {
+pgcommon::pgcommon(pqxx::connection &a_db)
+		: db(a_db), spec() {
+}
+
+void pgcommon::open_table_impl(const table_spec &a_spec) {
+	spec = a_spec;
 
 	try {
 		pqxx::work w(db);
-		w.exec("DROP TABLE " + name + ";");
+		w.exec("DROP TABLE " + std::string(spec.name) + ";");
 		w.commit();
 	}
 	catch (const pqxx::undefined_table &) {
 		// Ignore if this fails (for example table didn't exist)
 	}
 
-	std::string create = "CREATE TABLE " + name + " (";
-	for (columns_t::iterator it = columns.begin(); it != columns.end(); ++it) {
+	std::string create = std::string("CREATE TABLE " )+ spec.name + " (";
+	std::vector<column_spec> columns = spec.columns();
+	for (std::vector<column_spec>::iterator it = columns.begin(); it != columns.end(); ++it) {
 		create += std::string(it->name) + " ";
 		switch (it->type) {
 		case CT_VCHR64:
@@ -60,78 +65,43 @@ pgcommon::pgcommon(pqxx::connection &a_db, const char *a_name, const columns_t &
 
 void pgcommon::add_index_impl(const std::string &column) {
 	pqxx::work w(db);
-	w.exec("CREATE INDEX " + name + "_" + column + " ON " + name + " (" + column + ");");
+	w.exec(std::string("CREATE INDEX ") + spec.name + "_" + column + " ON " + spec.name + " (" + column + ");");
 	w.commit();
 }
 
 // ---------------------------------------------------------------------------
 // pgbuilder
 
-const std::string pgbuilder::stmt_insert("insertrow");
-
-pgbuilder::pgbuilder(pqxx::connection &a_db, const char *a_name, const columns_t &a_columns)
-		: tablebuilder(), pgcommon(a_db, a_name, a_columns) {
-	std::ostringstream query;
-	query << "INSERT INTO " << a_name << " VALUES (";
-	for (size_t i=0; i<columns.size(); i++) {
-		if (i)
-			query << ", ";
-		query << "$" << (i+1);
-	}
-	query << ");";
-	const pqxx::prepare::declaration prep = db.prepare(stmt_insert, query.str());
-	for (columns_t::iterator it = columns.begin(); it != columns.end(); ++it) {
-		switch (it->type) {
-		case CT_VCHR64:
-		case CT_TEXT:
-			prep("varchar", pqxx::prepare::treat_string);
-			break;
-		case CT_INT:
-		case CT_DATE:
-			prep("int", pqxx::prepare::treat_direct);
-			break;
-		default:
-			throw std::runtime_error("unsupported column type");
-		}
-	}
+pgbuilder::pgbuilder(pqxx::connection &a_db)
+		: pgcommon(a_db), tablebuilder() {
 }
 
-void pgbuilder::open_table() {
+void pgbuilder::open_table(const table_spec &a_spec) {
+	pgcommon::open_table_impl(a_spec);
+
+	cur_row.resize(spec.columns().size());
 	cur_work.reset(new pqxx::work(db));
+	cur_writer.reset(new pqxx::tablewriter(*cur_work, spec.name));
 }
 
 void pgbuilder::table_complete() {
+	cur_writer->complete();
+	cur_writer.reset();
 	cur_work->commit();
 	cur_work.reset();
-	db.unprepare(stmt_insert);
 }
 
 void pgbuilder::open_row() {
-	cur_insert.reset(new pqxx::prepare::invocation(*cur_work, stmt_insert));
+	cur_idx = 0;
 }
 
 void pgbuilder::row_complete() {
-	cur_insert->exec();
-	cur_insert.reset();
+	cur_writer->push_back(cur_row.begin(), cur_row.end());
 }
 
-void pgbuilder::add_column(const char *value) {
-	if (value)
-		(*cur_insert)(value);
-	else
-		(*cur_insert)();
-}
-
-void pgbuilder::add_column(const std::string &value) {
-	(*cur_insert)(value);
-}
-
-void pgbuilder::add_column(int value) {
-	(*cur_insert)(value);
-}
-
-void pgbuilder::add_column(double value) {
-	(*cur_insert)(value);
+void pgbuilder::add_column(const column_spec &col, const char *value) {
+	// TODO: For general usage, this should store a copy
+	cur_row[cur_idx++] = value;
 }
 
 void pgbuilder::add_index(const std::string &column) {
@@ -142,18 +112,22 @@ void pgbuilder::add_index(const std::string &column) {
 // ---------------------------------------------------------------------------
 // pgcopybuilder
 
-pgcopybuilder::pgcopybuilder(pqxx::connection &a_db, const char *a_name, const columns_t &a_columns)
-		: csvbuilder((std::string("/var/tmp/") + a_name + ".pgdata").c_str(), a_columns.size()),
-		  pgcommon(a_db, a_name, a_columns) {
+pgcopybuilder::pgcopybuilder(pqxx::connection &a_db, const std::string &tempdir)
+		: pgcommon(a_db), csvbuilder(tempdir) {
+}
+
+void pgcopybuilder::open_table(const table_spec &a_spec) {
+	pgcommon::open_table_impl(a_spec);
+	csvbuilder::open_table(a_spec);
 }
 
 void pgcopybuilder::table_complete() {
 	csvbuilder::table_complete();
 	std::cout << "  (pushing to db...)" << std::endl;
 	pqxx::work w(db);
-	w.exec("COPY " + name + " FROM '/var/tmp/" + name + ".pgdata' WITH DELIMITER AS ',';");
+	w.exec(std::string("COPY ") + spec.name + " FROM '" + filename(spec) + "' WITH DELIMITER AS ',';");
 	w.commit();
-	unlink((std::string("/var/tmp/") + name + ".pgdata").c_str());
+	unlink(filename(spec).c_str());
 }
 
 void pgcopybuilder::add_index(const std::string &column) {

@@ -21,41 +21,41 @@ namespace pqxx { namespace internal {
 class pgcommon {
 protected:
 	pqxx::connection &db;
-	std::string name;
-	typedef std::vector<column_spec> columns_t;
-	columns_t columns;
+	table_spec spec;
 
-	pgcommon(pqxx::connection &db, const char *a_name, const columns_t &a_columns);
+	pgcommon(pqxx::connection &db);
 	void add_index_impl(const std::string &column);
+	void open_table_impl(const table_spec &a_spec);
 };
 
-class pgbuilder : public tablebuilder, pgcommon {
+
+class pgbuilder : private pgcommon, public tablebuilder {
 private:
-	static const std::string stmt_insert;
+	std::vector<const char *> cur_row;
 	std::auto_ptr<pqxx::work> cur_work;
-	std::auto_ptr<pqxx::prepare::invocation> cur_insert;
+	std::auto_ptr<pqxx::tablewriter> cur_writer;
+	int cur_idx;
 
 public:
-	pgbuilder(pqxx::connection &db, const char *a_name, const columns_t &a_columns);
+	pgbuilder(pqxx::connection &db);
 
-	virtual void open_table();
+	virtual void open_table(const table_spec &spec);
 	virtual void table_complete();
 	virtual void open_row();
 	virtual void row_complete();
-	virtual void add_column(const char *value);
-	virtual void add_column(const std::string &value);
-	virtual void add_column(int value);
-	virtual void add_column(double value);
+	virtual void add_column(const column_spec &col, const char *value);
 
 	virtual void add_index(const std::string &column);
 };
 
-class pgcopybuilder : public csvbuilder, pgcommon {
-public:
-	pgcopybuilder(pqxx::connection &db, const char *a_name, const columns_t &a_columns);
 
-	void table_complete();
-	void add_index(const std::string &column);
+class pgcopybuilder : private pgcommon, public csvbuilder {
+public:
+	pgcopybuilder(pqxx::connection &db, const std::string &tempdir);
+
+	virtual void open_table(const table_spec &a_spec);
+	virtual void table_complete();
+	virtual void add_index(const std::string &column);
 };
 
 #endif // PGBUILDER_HPP_INCLUDED

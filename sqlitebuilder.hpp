@@ -16,22 +16,17 @@ private:
 
 	std::string name;
 	typedef std::vector<std::string> columns_t;
-	columns_t columns;
 
 public:
-	sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns);
-	~sqlitebuilder();
+	sqlitebuilder(sqlite3 *a_db);
 
-	virtual void open_table();
+	virtual void open_table(const table_spec &spec);
 	virtual void table_complete();
 
 	virtual void open_row();
 	virtual void row_complete();
 
-	virtual void add_column(const char *value);
-	virtual void add_column(const std::string &value);
-	virtual void add_column(int value);
-	virtual void add_column(double value);
+	virtual void add_column(const column_spec &col, const char *value);
 
 	virtual void add_index(const std::string &column);
 

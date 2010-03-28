@@ -2,10 +2,66 @@
 #include "sqlitebuilder.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <cstdlib>
 
-sqlitebuilder::sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t &a_columns)
-		: db(a_db), prepared(NULL), cur_index(0), row_count(0), name(a_name), columns(a_columns) {
+
+// ---------------------------------------------------------------------------
+// helper functions
+
+time_t parsedate(const char *value) {
+	if (!value) {
+		std::cerr << "warning: date parse failed for NULL" << std::endl;
+		return 0;
+	}
+	tm t = {0};
+	// try 2009-07-12T22:51:42.563
+	const char *rem = strptime(value, "%Y-%m-%dT%H:%M:%S", &t);
+	if (!rem) {
+		// try 2009-07-12
+		rem = strptime(value, "%Y-%m-%d", &t);
+		if (!rem) {
+			std::cerr << "warning: date parse failed for '" << value << "'" << std::endl;
+			return 0;
+		}
+		else if (*rem != '\0') {
+			// error
+			std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
+			return 0;
+		}
+	}
+	else if (*rem != '.') {
+		// error
+		std::cerr << "warning: date parse has unknown trailing data for '" << value << "'" << std::endl;
+		return 0;
+	}
+	return timegm(&t);
+}
+
+
+// ---------------------------------------------------------------------------
+// sqlitebuilder
+
+sqlitebuilder::sqlitebuilder(sqlite3 *a_db)
+		: db(a_db), prepared(NULL), cur_index(0), row_count(0), name() {
+}
+
+void sqlitebuilder::begin_transaction() {
+	int rv = sqlite3_exec(db, "BEGIN;", 0, 0, 0);
+	if (rv != SQLITE_OK)
+		std::cerr << "can't begin transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
+}
+
+void sqlitebuilder::end_transaction() {
+	int rv = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
+	if (rv != SQLITE_OK)
+		std::cerr << "can't commit transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
+}
+
+void sqlitebuilder::open_table(const table_spec &spec) {
 	int rv;
+
+	name = spec.name;
+	columns_t columns = spec.column_names();
 
 	std::string drop = "DROP TABLE IF EXISTS " + name + ";";
 	std::string create = "CREATE TABLE " + name + " (";
@@ -30,37 +86,20 @@ sqlitebuilder::sqlitebuilder(sqlite3 *a_db, const char *a_name, const columns_t 
 	rv = sqlite3_prepare_v2(db, prepare.c_str(), -1, &prepared, 0);
 	if (rv != SQLITE_OK)
 		throw std::runtime_error("can't prepare insert for table " + name + " (" + sqlite3_errmsg(db) + ")");
+
+	row_count = 0;
+	begin_transaction();
 }
 
-sqlitebuilder::~sqlitebuilder() {
+void sqlitebuilder::table_complete() {
 	sqlite3_finalize(prepared);
-}
-
-/*
-int sqlitebuilder::column_index(const std::string &name) {
-	for (size_t i=0; i<columns.size(); i++) {
-		if (columns[i] == name)
-			return i;
-	}
-	throw std::logic_error("invalid column name: " + name);
-}
-*/
-
-void sqlitebuilder::begin_transaction() {
-	int rv = sqlite3_exec(db, "BEGIN;", 0, 0, 0);
-	if (rv != SQLITE_OK)
-		std::cerr << "can't begin transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
-}
-
-void sqlitebuilder::end_transaction() {
-	int rv = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
-	if (rv != SQLITE_OK)
-		std::cerr << "can't commit transaction: (" << sqlite3_errmsg(db) << ")" << std::endl;
+	prepared = NULL;
+	end_transaction();
 }
 
 int sqlite3_bind_any(sqlite3_stmt* s, int i, const char *v) {
 	if (v)
-		return sqlite3_bind_text(s, i, v, -1, SQLITE_TRANSIENT);
+		return sqlite3_bind_text(s, i, v, -1, SQLITE_STATIC);
 	else
 		return sqlite3_bind_null(s, i);
 }
@@ -89,28 +128,27 @@ void sqlitebuilder::add_column_tmpl(T value){
 				std::endl;
 }
 
-void sqlitebuilder::add_column(const char *value) {
-	return add_column_tmpl(value);
-}
-
-void sqlitebuilder::add_column(const std::string &value) {
-	return add_column_tmpl(value);
-}
-
-void sqlitebuilder::add_column(int value) {
-	return add_column_tmpl(value);
-}
-
-void sqlitebuilder::add_column(double value) {
-	return add_column_tmpl(value);
-}
-
-void sqlitebuilder::open_table() {
-	begin_transaction();
-}
-
-void sqlitebuilder::table_complete() {
-	end_transaction();
+void sqlitebuilder::add_column(const column_spec &col, const char *value) {
+	if (!value) {
+		// NULL
+		add_column_tmpl(value);
+		return;
+	}
+	switch (col.type) {
+	case CT_VCHR64:
+	case CT_TEXT:
+		add_column_tmpl(value);
+		break;
+	case CT_INT:
+		add_column_tmpl(atoi(value));
+		break;
+	case CT_DATE:
+		add_column_tmpl(static_cast<int>(parsedate(value)));
+		break;
+	default:
+		throw std::logic_error("invalid column type");
+		break;
+	}
 }
 
 void sqlitebuilder::open_row() {

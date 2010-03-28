@@ -13,13 +13,16 @@ std::string csvescape(std::string value) {
 	return value;
 }
 
-csvbuilder::csvbuilder(const char *name, int a_column_count)
-		: csv(), first_column(true) {
-
-	csv.open(name);
+csvbuilder::csvbuilder(const std::string &a_outdir)
+		: outdir(a_outdir), csv(), first_column(true) {
 }
 
-void csvbuilder::open_table() {
+std::string csvbuilder::filename(const table_spec &spec) const {
+	return outdir + "/" + spec.name + ".pgdata";
+}
+
+void csvbuilder::open_table(const table_spec &spec) {
+	csv.open(filename(spec).c_str());
 }
 
 void csvbuilder::table_complete() {
@@ -44,22 +47,10 @@ void csvbuilder::add_column_tmpl(const T &data) {
 	csv << data;
 }
 
-void csvbuilder::add_column(const std::string &value) {
-	add_column_tmpl(csvescape(value));
-}
-
-void csvbuilder::add_column(const char *value) {
+void csvbuilder::add_column(const column_spec &spec, const char *value) {
 	if (value)
-		add_column(std::string(value));
+		add_column_tmpl(csvescape(value));
 	else
 		add_column_tmpl(nullstr);
-}
-
-void csvbuilder::add_column(int value) {
-	add_column_tmpl(value);
-}
-
-void csvbuilder::add_column(double value) {
-	add_column_tmpl(value);
 }
 
