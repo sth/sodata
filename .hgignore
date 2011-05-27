@@ -3,3 +3,6 @@ syntax: glob
 sqliteimport
 pgimport
 pgcopyimport
+.scons*
+.gdb*
+*.swp
