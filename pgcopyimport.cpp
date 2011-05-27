@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 
 	pqxx::connection db(config.connect);
 
-	pgcopybuilder builder(db, config.tempdie);
+	pgcopybuilder builder(db, config.tempdir);
 	import_tables(builder);
 
 	return 0;
