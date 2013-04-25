@@ -1,0 +1,7 @@
+*.o
+sqliteimport
+pgimport
+pgcopyimport
+.scons*
+.gdb*
+*.swp
