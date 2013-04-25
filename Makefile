@@ -11,15 +11,15 @@ default: sqliteimport pgimport pgcopyimport
 
 SQLITEOBJS=soimport.o dbspec.o xmldb.o sqlitebuilder.o sqliteimport.o
 sqliteimport: ${SQLITEOBJS}
-	${CXX} ${CPPFLAGS} -lexpat -lsqlite3 -o sqliteimport ${SQLITEOBJS}
+	${CXX} ${CPPFLAGS} -o sqliteimport ${SQLITEOBJS} -lexpat -lsqlite3
 
 PGOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o pgbuilder.o pgimport.o
 pgimport: ${PGOBJS}
-	${CXX} ${CPPFLAGS} -lexpat -lpqxx -o pgimport ${PGOBJS}
+	${CXX} ${CPPFLAGS} -o pgimport ${PGOBJS} -lexpat -lpqxx
 
 PGCOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o pgbuilder.o pgcopyimport.o
 pgcopyimport: ${PGCOBJS}
-	${CXX} ${CPPFLAGS} -lexpat -lpqxx -o pgcopyimport ${PGCOBJS}
+	${CXX} ${CPPFLAGS} -o pgcopyimport ${PGCOBJS} -lexpat -lpqxx
 
 clean:
 	rm -f *.o sqliteimport pgimport pgcopyimport
