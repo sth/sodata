@@ -1,6 +1,8 @@
 
+#include <pqxx/strconv> // Needs including first
 #include "pgbuilder.hpp"
 #include <iostream>
+#include <unistd.h>
 
 // ---------------------------------------------------------------------------
 // fix pqxx tablewriter escaping overloads (hacky)
