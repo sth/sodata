@@ -43,13 +43,13 @@ void xmltable::handle_element(const XML_Char *tag, const XML_Char **attrs) {
 	size_t idx = 0;
 	for (const XML_Char **a = attrs; *a; a+=2) {
 		if (idx >= columns.size()) {
-			std::cerr << "unknown column in " << name << ": " << *a << std::endl;
+			std::cerr << "row " << count << ": unknown column in " << name << ": " << *a << std::endl;
 			return;
 		}
 		while (strcmp(*a, columns[idx].name) != 0) {
 			add_column(columns[idx++], NULL);
 			if (idx >= columns.size()) {
-				std::cerr << "unknown column in " << name << ": " << *a << std::endl;
+				std::cerr << "row " << count << ": unknown column in " << name << ": " << *a << std::endl;
 				return;
 			}
 		}
