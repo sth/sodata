@@ -78,13 +78,28 @@ const column_spec comments_columns[] =
 		 {0}};
 const table_spec comments_table = {"comments", comments_columns};
 
-const size_t table_count = 5;
+const column_spec posthistory_columns[] =
+		{{"Id",             CT_INT},
+		 {"PostHistoryTypeId", CT_INT},
+		 {"PostId",         CT_INT},
+		 {"RevisionGUID",   CT_VCHR64},
+		 {"CreationDate",   CT_DATE},
+		 {"UserId",         CT_INT},
+		 {"UserDisplayName",CT_VCHR64},
+		 {"Comment",        CT_TEXT},
+		 {"CloseReasonId",  CT_INT},
+		 {"Text",           CT_TEXT},
+		 {0}};
+const table_spec posthistory_table = {"posthistory", posthistory_columns};
+
+const size_t table_count = 6;
 const table_spec tables[table_count] = {
 	users_table,
 	badges_table,
 	votes_table,
 	posts_table,
-	comments_table
+	comments_table,
+	posthistory_table,
 };
 
 const column_spec tags_columns[] =

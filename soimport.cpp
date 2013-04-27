@@ -245,6 +245,8 @@ void import_tables(tablebuilder &builder) {
 	if (config.tags) {
 		loader.write_tags(tags_table);
 	}
+
+	load_standard_table(builder, posthistory_table);
 }
 
 
