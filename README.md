@@ -27,7 +27,7 @@ This code contains three import tools:
 
 - `sqliteimport`, which imports the XML files into a Sqlite3 database
 - `pgimport`, which imports the XML files into a PostgreSQL database
-. `pgcopyimport`, which also imports the XML files into a PostgreSQL database,
+- `pgcopyimport`, which also imports the XML files into a PostgreSQL database,
   uses SQL `COPY` to do so. This is faster than `pgimport`, but requires a
   temporary file and superuser access to the database.
 
@@ -70,7 +70,7 @@ flag:
 
 ### Common options
 
-With the '-I' switch generating of indexes can be disabled. This makes the import
+With the `-I` switch generating of indexes can be disabled. This makes the import
 faster.
 
 ## Created Database
