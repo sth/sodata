@@ -57,13 +57,6 @@ private:
 	typedef std::vector< std::pair<int, std::string> > tags_t;
 	tags_t tags;
 
-#ifdef UNDEF
-	int urls_lastid;
-	typedef std::map<std::string, int> urls_t;
-	urls_t urls;
-	idrefs_t posturls;
-#endif
-
 	int plidx_cur, plidx_id, plidx_posttypeid, plidx_tags, plidx_body;
 	int pl_curid, pl_curposttype;
 
@@ -72,8 +65,6 @@ public:
 	virtual void open_row();
 	virtual void add_column(const column_spec &col, const char *value);
 
-	void write_urls(const table_spec &spec);
-	void write_posturls(const table_spec &spec);
 	void write_tags(const table_spec &spec);
 	//void write_posttags(const table_spec &spec);
 };
@@ -121,8 +112,6 @@ void sopostloader::add_column(const column_spec &col, const char *value) {
 			s = e + 1;
 		}
 	}
-	else if (config.urls && (plidx_cur == plidx_body) && (pl_curposttype == 2)) {
-	}
 }
 
 class dbvalue {
@@ -138,57 +127,6 @@ public:
 		return value.c_str();
 	}
 };
-
-#ifdef UNDEF
-void sopostloader::write_urls(const table_spec &spec) {
-	std::cout << "writing " << spec.name << std::endl;
-	builder.open_table(spec);
-	std::vector<column_spec> columns = spec.columns();
-	int counter(0);
-	for (urls_t::iterator it = urls.begin(); it != urls.end(); ++it) {
-		if (++counter % 100000 == 0)
-			std::cout << "  (" << counter << " datasets)" << std::endl;
-		builder.open_row();
-		dbvalue id(it->second);
-		builder.add_column(columns[0], id.get());
-		builder.add_column(columns[1], it->first.c_str());
-		builder.row_complete();
-	}
-	std::cout << "  (" << counter << " datasets)" << std::endl;
-	builder.table_complete();
-	if (config.indexes) {
-		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
-		builder.add_index(columns[0].name);
-		std::cout << "  (indexing " << columns[1].name << "...)" << std::endl;
-		builder.add_index(columns[1].name);
-	}
-}
-
-void sopostloader::write_posturls(const table_spec &spec) {
-	std::cout << "writing " << spec.name << std::endl;
-	std::vector<column_spec> columns = spec.columns();
-	builder.open_table(spec);
-	int counter(0);
-	for (idrefs_t::iterator it = posturls.begin(); it != posturls.end(); ++it) {
-		if (++counter % 100000 == 0)
-			std::cout << "  (" << counter << " datasets)" << std::endl;
-		builder.open_row();
-		dbvalue postid(it->first);
-		builder.add_column(columns[0], postid.get());
-		dbvalue urlid(it->second);
-		builder.add_column(columns[1], urlid.get());
-		builder.row_complete();
-	}
-	std::cout << "  (" << counter << " datasets)" << std::endl;
-	builder.table_complete();
-	if (config.indexes) {
-		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
-		builder.add_index(columns[0].name);
-		std::cout << "  (indexing " << columns[1].name << "...)" << std::endl;
-		builder.add_index(columns[1].name);
-	}
-}
-#endif
 
 void sopostloader::write_tags(const table_spec &spec) {
 	std::cout << "writing " << spec.name << std::endl;
@@ -237,11 +175,6 @@ void import_tables(tablebuilder &builder) {
 	if (config.indexes) {
 		loader.add_indexes();
 	}
-#ifdef UNDEF
-	if (config.urls) {
-		//loader.write_urls():
-	}
-#endif
 	if (config.tags) {
 		loader.write_tags(tags_table);
 	}
@@ -281,9 +214,6 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			default:
 				assert(0);
 			}
-#ifdef UNDEF
-					"  -U           Don't add a urls table" << std::endl <<
-#endif
 			exit(0);
 		}
 		else if (strcmp("-I", argv[i]) == 0) {
@@ -291,9 +221,6 @@ void parse_config(configset_t cs, int argc, char **argv) {
 		}
 		else if (strcmp("-T", argv[i]) == 0) {
 			config.tags = false;
-		}
-		else if (strcmp("-U", argv[i]) == 0) {
-			config.urls = false;
 		}
 		else if (strcmp("-c", argv[i]) == 0) {
 			if (i+1 >= argc) {
