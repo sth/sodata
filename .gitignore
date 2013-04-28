@@ -5,3 +5,4 @@ csvimport
 .scons*
 .gdb*
 *.swp
+soimport.tar.gz

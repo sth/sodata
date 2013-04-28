@@ -1,22 +1,31 @@
 
-env = Environment()
-env.Append(CXXFLAGS = Split('-Wall -O2'), LIBS = ['expat'])
+# Basic compilation environment
+benv = Environment()
+benv.Append(
+      CXXFLAGS = ['-Wall', '-O2'],
+      LIBS = ['expat']
+   )
 
-commonobjs = env.Object(['xmldb.cpp', 'soimport.cpp', 'dbspec.cpp'])
+# Environment for sqliteimport
+senv = benv.Clone()
+senv.Append(
+      LIBS = ['sqlite3']
+   )
 
-sqliteenv = env.Clone()
-sqliteenv.Append(LIBS = ['sqlite3'])
-sqliteobjs = sqliteenv.Object(['sqlitebuilder.cpp', 'sqliteimport.cpp'])
+# Environment for pgimport
+penv = benv.Clone()
+penv.Append(
+      LIBS = ['pqxx']
+   )
 
-sqliteenv.Program('sqliteimport', commonobjs + sqliteobjs)
+common = ['xmldb.cpp', 'soimport.cpp', 'dbspec.cpp']
 
-pgenv = env.Clone()
-pgenv.Append(LIBS = ['pqxx'])
-pgobjs = pgenv.Object(['csvbuilder.cpp', 'pgbuilder.cpp'])
+benv.Program('csvimport', benv.Object(common + ['csvbuilder.cpp', 'csvimport.cpp']))
 
-pgiobjs = pgenv.Object('pgimport.cpp')
-pgenv.Program('pgimport', commonobjs + pgobjs + pgiobjs)
+senv.Program('sqliteimport', benv.Object(common + ['sqlitebuilder.cpp', 'sqliteimport.cpp']))
 
-env.Append(TARFLAGS = ['-z'])
-env.Tar('soimport.tar.gz', ['sqliteimport', 'pgimport'])
+penv.Program('pgimport', benv.Object(common + ['csvbuilder.cpp', 'pgbuilder.cpp', 'pgimport.cpp']))
+
+benv.Append(TARFLAGS = ['-z'])
+benv.Tar('soimport.tar.gz', ['csvimport', 'sqliteimport', 'pgimport'])
 
