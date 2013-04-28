@@ -21,6 +21,10 @@ PGCOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o pgbuilder.o pgcopyimport.o
 pgcopyimport: ${PGCOBJS}
 	${CXX} ${CPPFLAGS} -o pgcopyimport ${PGCOBJS} -lexpat -lpqxx
 
+CSVOBJS=soimport.o dbspec.o xmldb.o csvbuilder.o csvimport.o
+csvimport: ${CSVOBJS}
+	${CXX} ${CPPFLAGS} -o csvimport ${CSVOBJS} -lexpat
+
 clean:
-	rm -f *.o sqliteimport pgimport pgcopyimport
+	rm -f *.o sqliteimport pgimport pgcopyimport csvimport
 

@@ -275,6 +275,9 @@ void parse_config(configset_t cs, int argc, char **argv) {
 				std::cout <<
 					"  -f FILENAME  Name of database file" << std::endl;
 				break;
+			case CS_CSV:
+				std::cout <<
+					"  -d DIRNAME   Put CSV files in this directory" << std::endl;
 			default:
 				assert(0);
 			}

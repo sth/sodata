@@ -38,7 +38,8 @@ extern config_t config;
 
 enum configset_t {
 	CS_PG,
-	CS_SQLITE
+	CS_SQLITE,
+	CS_CSV,
 };
 
 void parse_config(configset_t cs, int argc, char **argv);
