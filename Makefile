@@ -5,6 +5,7 @@ HEADS=csvbuilder.hpp pgbuilder.hpp soschema.hpp tablebuilder.hpp dbspec.hpp \
 		soimport.hpp sqlitebuilder.hpp xmldb.hpp 
 
 default: sqliteimport pgimport pgcopyimport
+all: default csvimport
 
 %.o: %.cpp ${HEADS}
 	${CXX} ${CPPFLAGS} -c $<

@@ -202,15 +202,17 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			switch (cs) {
 			case CS_PG:
 				std::cout <<
+					"  -s           Simple import. Don't use COPY" << std::endl <<     
 					"  -c CONNECT   Database connect string/filename" << std::endl <<
-					"  -d DIRNAME   Use temporary files in this directory" << std::endl;
+					"  -d DIRNAME   Use SQL COPY with temporary files in this directory" << std::endl;
+				break;
 			case CS_SQLITE:
 				std::cout <<
-					"  -f FILENAME  Name of database file" << std::endl;
+					"  -f FILENAME  Name of database file [dump.db]" << std::endl;
 				break;
 			case CS_CSV:
 				std::cout <<
-					"  -d DIRNAME   Put CSV files in this directory" << std::endl;
+					"  -d DIRNAME   Put output CSV files in this directory [.]" << std::endl;
 			default:
 				assert(0);
 			}
@@ -222,19 +224,22 @@ void parse_config(configset_t cs, int argc, char **argv) {
 		else if (strcmp("-T", argv[i]) == 0) {
 			config.tags = false;
 		}
+		else if (strcmp("-s", argv[i]) == 0) {
+			config.simple = true;
+		}
 		else if (strcmp("-c", argv[i]) == 0) {
 			if (i+1 >= argc) {
 				std::cerr << "missing argument after '-c'" << std::endl;
 				exit(1);
 			}
-			config.connect = argv[++i];
+			config.dir = argv[++i];
 		}
 		else if (strcmp("-d", argv[i]) == 0) {
 			if (i+1 >= argc) {
 				std::cerr << "missing argument after '-d'" << std::endl;
 				exit(1);
 			}
-			config.tempdir = argv[++i];
+			config.dir = argv[++i];
 		}
 		else if (strcmp("-f", argv[i]) == 0) {
 			if (i+1 >= argc) {

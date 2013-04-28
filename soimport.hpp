@@ -25,11 +25,12 @@ protected:
 struct config_t {
 	bool indexes;
 	bool tags;
+	bool simple;
 	std::string connect;
-	std::string tempdir;
+	std::string dir;
 	std::string dbfile;
-	config_t() : indexes(true), tags(true),
-			connect(), tempdir(), dbfile() {
+	config_t() : indexes(true), tags(true), simple(false),
+			connect(), dir(), dbfile() {
 	}
 };
 

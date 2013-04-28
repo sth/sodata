@@ -16,18 +16,15 @@ int main(int argc, char *argv[]) {
 
 	pqxx::connection db(config.connect);
 
-	//std::auto_ptr<tablebuilder> builder;
-	//builder.reset(new pgbuilder(db));
-	if (config.tempdir.empty()) {
+	if (config.simple) {
 		pgbuilder builder(db);
 		import_tables(builder);
 	}
 	else {
-		pgcopybuilder builder(db, config.tempdir);
+		pgcopybuilder builder(db, config.dir);
 		import_tables(builder);
 	}
 
 	return 0;
 }
-
 

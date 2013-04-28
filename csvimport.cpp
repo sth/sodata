@@ -8,10 +8,11 @@
 int main(int argc, char *argv[]) {
 	parse_config(CS_CSV, argc, argv);
 
-	if (config.tempdir.empty())
-		config.tempdir = ".";
+	if (config.dir.empty()) {
+		config.dir = ".";
+	}
 
-	csvbuilder builder(config.tempdir);
+	csvbuilder builder(config.dir);
 	import_tables(builder);
 }
 
