@@ -1,7 +1,7 @@
 *.o
 sqliteimport
 pgimport
-pgcopyimport
+csvimport
 .scons*
 .gdb*
 *.swp

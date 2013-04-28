@@ -5,7 +5,7 @@ Dependencies
 Required libraries:
 - libexpat
 - libsqlite3 (for sqliteimport)
-- libpqxx (for pgimport, pgcopyimport)
+- libpqxx (for pgimport)
 
 Libraries are needed to run the programs. Additionally their development
 headers to build them. For compilation also a C++ compiler is necessary.

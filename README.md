@@ -27,9 +27,6 @@ This code can be compiled to generate four import tools:
 
 - `sqliteimport`, which imports the XML files into a Sqlite3 database
 - `pgimport`, which imports the XML files into a PostgreSQL database
-- `pgcopyimport`, which also imports the XML files into a PostgreSQL database,
-  uses SQL `COPY` to do so. This is faster than `pgimport`, but requires a
-  temporary file and superuser access to the database.
 - `csvimport`, which converts the XML files into CSV files
 
 Generally it is recommended to use a new, empty database to import into, but
@@ -53,21 +50,23 @@ data. You should specify connect options with the `-c` flag, like this:
 
     pgimport -c "host=localhost dbname=so user=soimporter password=abc"
 
-If possible you should use pgcopyimport instead, since it is usually faster.
-
-### pgcopyimport
-
-Expects a existing and preferable empty PostgreSQL database and fills it with
-data. It will use a temporary file anda SQL `COPY` to import the data faster.
+By default, this will use a temporary file and SQL `COPY` to import the data.
 This means that you'll need enough free diskspace to store a temporary copy
-of the data. Also the importing databse user will need to have superuser
+of the data. Also the importing database user will need to have superuser
 privileges in the database to be allowed to use `COPY`.
 
-By default the temporary files will be put in `/var/tmp`, but the directory
-can be changed with the `-d` flag. Connect options can be specified with the
-`-c` flag:
+The directory used for the temporary data can be specified with the `-d` option:
 
-    pgcopyimport -d ~/tmp/ -c "host=localhost dbname=so user=admin password=abc1"
+    pgimport -d tmpdir -c ...
+
+There has to be enough free diskspace to store a temporary copy of each table in
+that directory. Having this on a different hard disk than the database or the
+input files will speed up the import process.
+
+The import can also be done without temporary files and without requiring a
+database superuser. For this use the `-s` flag:
+
+    pgimport -s -c ...
 
 ### csvimport
 
@@ -77,7 +76,7 @@ directory is used.
 
 The resulting CSV files use escaping as understood by PostgreSQL. This means
 that the characters `\\` (backslash), `\n` (newline), `\r` (aarrige retrun),
-and `,` (comma) will be escaped by a preceeding backslash when they occur in
+and `,` (comma) will be escaped by a preceding backslash when they occur in
 a text field. NULL values will be represented by `\\N` (a backslash character
 followed by a capital N).
 
@@ -96,11 +95,13 @@ imported.
 
 ## Compiling
 
+All programs use `libexpat` to parse the input files, it has to be available.
+
 To compile `sqliteimport` you'll need to have libsqlite3 installed, including
 it's header files.
 
-To compile `pgimport` or `pgcopyimport` you'll need to have `libpqxx`
-installed, including it's header files.
+To compile `pgimport` you'll need to have `libpqxx` installed, including it's
+header files.
 
 To build all tools, simply type:
 
@@ -110,7 +111,7 @@ You can also just compile the tools individually:
 
     make sqliteimport
     make pgimport
-    make pgcopyimport
+    make csvimport
 
  [1]: http://creativecommons.org/licenses/by-sa/3.0/
  [2]: http://blog.stackoverflow.com/2009/06/stack-overflow-creative-commons-data-dump/
