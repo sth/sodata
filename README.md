@@ -23,13 +23,14 @@ also want to look at the online [Stack Exchange Data Explorer][dbexplore].
 
 ## Usage
 
-This code contains three import tools:
+This code can be compiled to generate four import tools:
 
 - `sqliteimport`, which imports the XML files into a Sqlite3 database
 - `pgimport`, which imports the XML files into a PostgreSQL database
 - `pgcopyimport`, which also imports the XML files into a PostgreSQL database,
   uses SQL `COPY` to do so. This is faster than `pgimport`, but requires a
   temporary file and superuser access to the database.
+- `csvimport`, which converts the XML files into CSV files
 
 Generally it is recommended to use a new, empty database to import into, but
 the tools don't really care if there are existing tables, as long as there are
@@ -67,6 +68,18 @@ can be changed with the `-d` flag. Connect options can be specified with the
 `-c` flag:
 
     pgcopyimport -d ~/tmp/ -c "host=localhost dbname=so user=admin password=abc1"
+
+### csvimport
+
+Generates CSV (Comma separated value) files form the XML data. The `-d` parameter
+can be used to specify a target directory, by default the current working
+directory is used.
+
+The resulting CSV files use escaping as understood by PostgreSQL. This means
+that the characters `\\` (backslash), `\n` (newline), `\r` (aarrige retrun),
+and `,` (comma) will be escaped by a preceeding backslash when they occur in
+a text field. NULL values will be represented by `\\N` (a backslash character
+followed by a capital N).
 
 ### Common options
 
