@@ -62,11 +62,11 @@ This means that you'll need enough free diskspace to store a temporary copy
 of the data. Also the importing databse user will need to have superuser
 privileges in the database to be allowed to use `COPY`.
 
-By default the temporary files will be put in `/var/tmp`, but this can be
-changed with the `-i` flag. Connect options can be specified with the `-c`
-flag:
+By default the temporary files will be put in `/var/tmp`, but the directory
+can be changed with the `-d` flag. Connect options can be specified with the
+`-c` flag:
 
-    pgcopyimport -i ~/tmp/ -c "host=localhost dbname=so user=admin password=abc1"
+    pgcopyimport -d ~/tmp/ -c "host=localhost dbname=so user=admin password=abc1"
 
 ### Common options
 

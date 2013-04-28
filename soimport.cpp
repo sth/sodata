@@ -270,8 +270,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			case CS_PG:
 				std::cout <<
 					"  -c CONNECT   Database connect string/filename" << std::endl <<
-					"  -i DIRNAME   Use temporary files in this directory" << std::endl;
-				break;
+					"  -d DIRNAME   Use temporary files in this directory" << std::endl;
 			case CS_SQLITE:
 				std::cout <<
 					"  -f FILENAME  Name of database file" << std::endl;
@@ -300,9 +299,9 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			}
 			config.connect = argv[++i];
 		}
-		else if (strcmp("-i", argv[i]) == 0) {
+		else if (strcmp("-d", argv[i]) == 0) {
 			if (i+1 >= argc) {
-				std::cerr << "missing argument after '-i'" << std::endl;
+				std::cerr << "missing argument after '-d'" << std::endl;
 				exit(1);
 			}
 			config.tempdir = argv[++i];
