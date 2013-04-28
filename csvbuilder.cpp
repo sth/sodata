@@ -4,6 +4,10 @@
 
 const std::string nullstr("\\N");
 
+/** Escape characters that are special in csv files.
+ *
+ * The parameters is passed by value because it is going to be modified.
+ */
 std::string csvescape(std::string value) {
 	size_t pos = 0;
 	while ((pos = value.find_first_of("\\\n\r,", pos)) != value.npos) {
@@ -18,7 +22,7 @@ csvbuilder::csvbuilder(const std::string &a_outdir)
 }
 
 std::string csvbuilder::filename(const table_spec &spec) const {
-	return outdir + "/" + spec.name + ".pgdata";
+	return outdir + "/" + spec.name + ".csv";
 }
 
 void csvbuilder::open_table(const table_spec &spec) {
