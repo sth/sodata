@@ -23,7 +23,7 @@ also want to look at the online [Stack Exchange Data Explorer][dbexplore].
 
 ## Usage
 
-This code can be compiled to generate four import tools:
+This code can be compiled to generate three import tools:
 
 - `sqliteimport`, which imports the XML files into a Sqlite3 database
 - `pgimport`, which imports the XML files into a PostgreSQL database
