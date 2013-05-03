@@ -3,7 +3,7 @@
 ## Stack Exchange Data Dumps
 
 The user generated content on Stack Overflow and the whole Stack Exchange
-network is licensed under the Creative Commons CC [BY-SA 3.0][1] license. There
+network is licensed under the Creative Commons [CC BY-SA 3.0][1] license. There
 are regular (more or less) data dumps provided in XML format that contain
 all the questions/answers/comments/vote counts/... of the Stack Exchange
 sites.
