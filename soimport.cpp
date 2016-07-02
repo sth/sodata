@@ -232,7 +232,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 				std::cerr << "missing argument after '-c'" << std::endl;
 				exit(1);
 			}
-			config.dir = argv[++i];
+			config.connect = argv[++i];
 		}
 		else if (strcmp("-d", argv[i]) == 0) {
 			if (i+1 >= argc) {
