@@ -19,7 +19,7 @@ For more information about the data dumps and where to download them, see:
 
 If you just want to play around with the database a little without all the effort
 of downloading GBs of data and importing them into your own database, you might
-also want to look at the online [Stack Exchange Data Explorer][dbexplore].
+want to have look at the online [Stack Exchange Data Explorer][dbexplore] instead.
 
 ## Usage
 
@@ -45,7 +45,7 @@ Creates a Sqlite3 database. By default it creates a new database file called
 
 ### pgimport
 
-Expects a existing and preferable empty PostgreSQL database and fills it with
+Expects an existing and preferably empty PostgreSQL database and fills it with
 data. You should specify connect options with the `-c` flag, like this:
 
     pgimport -c "host=localhost dbname=so user=soimporter password=abc"
@@ -75,7 +75,7 @@ can be used to specify a target directory, by default the current working
 directory is used.
 
 The resulting CSV files use escaping as understood by PostgreSQL. This means
-that the characters `\\` (backslash), `\n` (newline), `\r` (aarrige retrun),
+that the characters `\\` (backslash), `\n` (newline), `\r` (carrige retrun),
 and `,` (comma) will be escaped by a preceding backslash when they occur in
 a text field. NULL values will be represented by `\\N` (a backslash character
 followed by a capital N).
@@ -97,7 +97,7 @@ imported.
 
 All programs use `libexpat` to parse the input files, it has to be available.
 
-To compile `sqliteimport` you'll need to have libsqlite3 installed, including
+To compile `sqliteimport` you'll need to have `libsqlite3` installed, including
 it's header files.
 
 To compile `pgimport` you'll need to have `libpqxx` installed, including it's
@@ -107,7 +107,7 @@ To build all tools, simply type:
 
     make
 
-You can also just compile the tools individually:
+You can also compile the tools individually:
 
     make sqliteimport
     make pgimport
