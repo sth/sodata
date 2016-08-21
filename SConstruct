@@ -2,7 +2,7 @@
 # Basic compilation environment
 benv = Environment()
 benv.Append(
-      CXXFLAGS = ['-Wall', '-O2'],
+      CXXFLAGS = ['-Wall', '-O2', '-ggdb'],
       LIBS = ['expat']
    )
 

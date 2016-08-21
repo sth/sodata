@@ -1,6 +1,6 @@
 
 CXX=g++
-CPPFLAGS=-O2 -Wall
+CPPFLAGS=-O2 -ggdb -Wall
 HEADS=csvbuilder.hpp pgbuilder.hpp soschema.hpp tablebuilder.hpp dbspec.hpp \
 		soimport.hpp sqlitebuilder.hpp xmldb.hpp 
 
