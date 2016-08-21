@@ -27,5 +27,5 @@ senv.Program('sqliteimport', benv.Object(common + ['sqlitebuilder.cpp', 'sqlitei
 penv.Program('pgimport', benv.Object(common + ['csvbuilder.cpp', 'pgbuilder.cpp', 'pgimport.cpp']))
 
 benv.Append(TARFLAGS = ['-z'])
-benv.Tar('soimport.tar.gz', ['csvimport', 'sqliteimport', 'pgimport'])
+benv.Tar('sodata.tar.gz', ['csvimport', 'sqliteimport', 'pgimport'])
 
