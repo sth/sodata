@@ -192,7 +192,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 	for (int i = 1; i < argc; i++) {
 		if      (strcmp("-h", argv[i]) == 0) {
 			std::cout <<
-					"Start from directory with Stack Overflow database dump" <<
+					"Start from directory with Stack Overflow database dump " <<
 					"Xml files to create a dump.db sqlite database." << std::endl <<
 					std::endl <<
 					"Options:" << std::endl <<
