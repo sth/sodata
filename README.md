@@ -113,6 +113,11 @@ You can also compile the tools individually:
     make pgimport
     make csvimport
 
+## License
+
+Licensed under LGPL. This allows the creation of a library from this code
+that can be used in non-GPL programs.
+
  [1]: http://creativecommons.org/licenses/by-sa/3.0/
  [2]: http://blog.stackoverflow.com/2009/06/stack-overflow-creative-commons-data-dump/
  [3]: http://www.clearbits.net/creators/146-stack-exchange-data-dump
