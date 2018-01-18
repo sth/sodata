@@ -95,13 +95,22 @@ imported.
 
 ## Compiling
 
-All programs use `libexpat` to parse the input files, it has to be available.
+All programs use `libexpat` to parse the input files, it and it's header files
+have to be available.
+On Debian or Ubuntu based systems you can install the required files like this,
+for example:
+
+    sudo apt install libexpat1 libexpat1-dev
 
 To compile `sqliteimport` you'll need to have `libsqlite3` installed, including
-it's header files.
+it's header files:
+
+    sudo apt install libsqlite3-0 libsqlite3-dev
 
 To compile `pgimport` you'll need to have `libpqxx` installed, including it's
-header files.
+header files:
+
+    sudo apt install libpqxx-4.0 libpqxx-dev
 
 To build all tools, simply type:
 
