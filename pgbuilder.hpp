@@ -6,6 +6,7 @@
 #include "dbspec.hpp"
 #include <string>
 #include <vector>
+#include <memory>
 #include <pqxx/connection>
 #include <pqxx/transaction>
 #include <pqxx/tablewriter>
@@ -24,8 +25,8 @@ protected:
 class pgbuilder : private pgcommon, public tablebuilder {
 private:
 	std::vector<const char *> cur_row;
-	std::auto_ptr<pqxx::work> cur_work;
-	std::auto_ptr<pqxx::tablewriter> cur_writer;
+	std::unique_ptr<pqxx::work> cur_work;
+	std::unique_ptr<pqxx::tablewriter> cur_writer;
 	int cur_idx;
 
 public:
