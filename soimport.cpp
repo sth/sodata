@@ -54,8 +54,8 @@ void soloader::add_indexes() {
 
 class sopostloader : public soloader {
 private:
-	typedef std::vector< std::pair<int, std::string> > tags_t;
-	tags_t tags;
+	typedef std::vector< std::pair<int, std::string> > posttags_t;
+	posttags_t posttags;
 
 	int plidx_cur, plidx_id, plidx_posttypeid, plidx_tags, plidx_body;
 	int pl_curid, pl_curposttype;
@@ -65,12 +65,11 @@ public:
 	virtual void open_row();
 	virtual void add_column(const column_spec &col, const char *value);
 
-	void write_tags(const table_spec &spec);
-	//void write_posttags(const table_spec &spec);
+	void write_posttags(const table_spec &spec);
 };
 
 sopostloader::sopostloader(tablebuilder &a_builder, const table_spec &a_table)
-		: soloader(a_builder, a_table), tags() {
+		: soloader(a_builder, a_table), posttags() {
 	plidx_id = a_table.column_index("Id");
 	plidx_posttypeid = a_table.column_index("PostTypeId");
 	plidx_tags = a_table.column_index("Tags");
@@ -97,18 +96,18 @@ void sopostloader::add_column(const column_spec &col, const char *value) {
 	else if (plidx_cur == plidx_posttypeid) {
 		pl_curposttype = atoi(value);
 	}
-	else if (config.tags && (plidx_cur == plidx_tags) && (pl_curposttype == 1)) {
+	else if (config.posttags && (plidx_cur == plidx_tags) && (pl_curposttype == 1)) {
 		std::string tname(value);
 		size_t s, e;
 		s = 0;
 		while (s < tname.length()) {
 			e = tname.find('>', s);
 			if ((tname[s] != '<') || (e == tname.npos)) {
-				std::cerr << "invalid tags: " << tname << std::endl;
+				std::cerr << "invalid post tags: " << tname << std::endl;
 				break;
 			}
 			std::string tag(tname.substr(s+1, e-s-1));
-			tags.push_back(std::make_pair(pl_curid, tag));
+			posttags.push_back(std::make_pair(pl_curid, tag));
 			s = e + 1;
 		}
 	}
@@ -128,12 +127,12 @@ public:
 	}
 };
 
-void sopostloader::write_tags(const table_spec &spec) {
+void sopostloader::write_posttags(const table_spec &spec) {
 	std::cout << "writing " << spec.name << std::endl;
 	std::vector<column_spec> columns = spec.columns();
 	builder.open_table(spec);
 	int counter(0);
-	for (tags_t::iterator it = tags.begin(); it != tags.end(); ++it) {
+	for (posttags_t::iterator it = posttags.begin(); it != posttags.end(); ++it) {
 		if (++counter % 100000 == 0)
 			std::cout << "  (" << counter << " datasets)" << std::endl;
 		builder.open_row();
@@ -176,8 +175,8 @@ void import_tables(tablebuilder &builder) {
 		if (config.indexes) {
 			loader.add_indexes();
 		}
-		if (config.tags) {
-			loader.write_tags(tags_table);
+		if (config.posttags) {
+			loader.write_posttags(posttags_table);
 		}
 
 		load_standard_table(builder, posthistory_table);
@@ -203,7 +202,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 					"Options:" << std::endl <<
 					"  -h           Display this help message" << std::endl <<
 					"  -I           Don't add indexes" << std::endl <<
-					"  -T           Don't add a tags table" << std::endl;
+					"  -T           Don't add a post tags table" << std::endl;
 			switch (cs) {
 			case CS_PG:
 				std::cout <<
@@ -227,7 +226,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			config.indexes = false;
 		}
 		else if (strcmp("-T", argv[i]) == 0) {
-			config.tags = false;
+			config.posttags = false;
 		}
 		else if (strcmp("-s", argv[i]) == 0) {
 			config.simple = true;

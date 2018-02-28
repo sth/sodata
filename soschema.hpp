@@ -102,11 +102,11 @@ const table_spec tables[table_count] = {
 	posthistory_table,
 };
 
-const column_spec tags_columns[] =
+const column_spec posttags_columns[] =
 		{{"PostId",         CT_INT},
 		 {"Name",           CT_VCHR64},
 		 {0}};
-const table_spec tags_table = {"tags", tags_columns};
+const table_spec posttags_table = {"PostTags", posttags_columns};
 
 } // namepace
 
