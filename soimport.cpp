@@ -128,20 +128,20 @@ public:
 };
 
 void sopostloader::write_posttags(const table_spec &spec) {
-	std::cout << "writing " << spec.name << std::endl;
+	std::cout << "building " << spec.name << std::endl;
 	std::vector<column_spec> columns = spec.columns();
 	builder.open_table(spec);
 	int counter(0);
 	for (posttags_t::iterator it = posttags.begin(); it != posttags.end(); ++it) {
 		if (++counter % 100000 == 0)
-			std::cout << "  (" << counter << " datasets)" << std::endl;
+			std::cout << "  (... " << counter << " datasets)" << std::endl;
 		builder.open_row();
 		dbvalue id(it->first);
 		builder.add_column(columns[0], id.get());
 		builder.add_column(columns[1], it->second.c_str());
 		builder.row_complete();
 	}
-	std::cout << "  (" << counter << " datasets)" << std::endl;
+	std::cout << "  (got " << counter << " datasets)" << std::endl;
 	builder.table_complete();
 	if (config.indexes) {
 		std::cout << "  (indexing " << columns[0].name << "...)" << std::endl;
