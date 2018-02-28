@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include <cstring>
 
 
 // ---------------------------------------------------------------------------
@@ -35,6 +36,15 @@ time_t parsedate(const char *value) {
 		return 0;
 	}
 	return timegm(&t);
+}
+
+int parsebool(const char *value) {
+	if (std::strcmp(value, "True") == 0)
+		return 1;
+	else if (std::strcmp(value, "False") == 0)
+		return 0;
+	else
+		throw std::runtime_error(std::string("cannot parse value as bool: ") + value);
 }
 
 
@@ -144,6 +154,9 @@ void sqlitebuilder::add_column(const column_spec &col, const char *value) {
 		break;
 	case CT_DATE:
 		add_column_tmpl(static_cast<int>(parsedate(value)));
+		break;
+	case CT_BOOL:
+		add_column_tmpl(parsebool(value));
 		break;
 	default:
 		throw std::logic_error("invalid column type");

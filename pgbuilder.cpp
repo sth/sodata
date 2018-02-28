@@ -40,6 +40,9 @@ void pgcommon::open_table_impl(const table_spec &a_spec) {
 		case CT_DATE:
 			create += "timestamp";
 			break;
+		case CT_BOOL:
+			create += "boolean";
+			break;
 		default:
 			throw std::runtime_error("Unsupported column type");
 		}

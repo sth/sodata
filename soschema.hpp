@@ -34,7 +34,7 @@ const column_spec badges_columns[] =
 		 {"Name",           CT_VCHR64},
 		 {"Date",           CT_DATE},
 		 {"Class",          CT_INT},
-		 {"TagBased",       CT_INT},
+		 {"TagBased",       CT_BOOL},
 		 {0}};
 const table_spec badges_table = {"Badges", badges_columns};
 

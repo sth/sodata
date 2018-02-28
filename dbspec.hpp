@@ -11,7 +11,8 @@ enum column_type_t {
 	CT_VCHR64,
 	CT_TEXT,
 	CT_INT,
-	CT_DATE
+	CT_DATE,
+	CT_BOOL,
 };
 
 struct column_spec {
