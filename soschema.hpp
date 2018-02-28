@@ -24,7 +24,7 @@ const column_spec users_columns[] =
 		 {"UpVotes",        CT_INT},
 		 {"DownVotes",      CT_INT},
 		 {0}};
-const table_spec users_table = {"users", users_columns};
+const table_spec users_table = {"Users", users_columns};
 
 const column_spec badges_columns[] =
 		{{"Id",             CT_INT},
@@ -32,7 +32,7 @@ const column_spec badges_columns[] =
 		 {"Name",           CT_VCHR64},
 		 {"Date",           CT_DATE},
 		 {0}};
-const table_spec badges_table = {"badges", badges_columns};
+const table_spec badges_table = {"Badges", badges_columns};
 
 const column_spec votes_columns[] =
 		{{"Id",             CT_INT},
@@ -42,7 +42,7 @@ const column_spec votes_columns[] =
 		 {"CreationDate",   CT_DATE},
 		 {"BountyAmount",   CT_INT},
 		 {0}};
-const table_spec votes_table = {"votes", votes_columns};
+const table_spec votes_table = {"Votes", votes_columns};
 
 const column_spec posts_columns[] =
 		{{"Id",             CT_INT},
@@ -66,7 +66,7 @@ const column_spec posts_columns[] =
 		 {"CommentCount",   CT_INT},
 		 {"FavoriteCount",  CT_INT},
 		 {0}};
-const table_spec posts_table = {"posts", posts_columns};
+const table_spec posts_table = {"Posts", posts_columns};
 
 const column_spec comments_columns[] =
 		{{"Id",             CT_INT},
@@ -76,7 +76,7 @@ const column_spec comments_columns[] =
 		 {"CreationDate",   CT_DATE},
 		 {"UserId",         CT_INT},
 		 {0}};
-const table_spec comments_table = {"comments", comments_columns};
+const table_spec comments_table = {"Comments", comments_columns};
 
 const column_spec posthistory_columns[] =
 		{{"Id",             CT_INT},
@@ -90,7 +90,7 @@ const column_spec posthistory_columns[] =
 		 {"CloseReasonId",  CT_INT},
 		 {"Text",           CT_TEXT},
 		 {0}};
-const table_spec posthistory_table = {"posthistory", posthistory_columns};
+const table_spec posthistory_table = {"PostHistory", posthistory_columns};
 
 const size_t table_count = 6;
 const table_spec tables[table_count] = {
