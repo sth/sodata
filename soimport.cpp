@@ -195,6 +195,7 @@ void import_tables(tablebuilder &builder) {
 config_t config;
 
 void parse_config(configset_t cs, int argc, char **argv) {
+	config.dir = "."; // default
 	for (int i = 1; i < argc; i++) {
 		if      (strcmp("-h", argv[i]) == 0) {
 			std::cout <<
@@ -210,7 +211,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 				std::cout <<
 					"  -s           Simple import. Don't use COPY" << std::endl <<     
 					"  -c CONNECT   Database connect string/filename" << std::endl <<
-					"  -d DIRNAME   Use SQL COPY with temporary files in this directory" << std::endl;
+					"  -d DIRNAME   Use SQL COPY with temporary files in this directory [.]" << std::endl;
 				break;
 			case CS_SQLITE:
 				std::cout <<
