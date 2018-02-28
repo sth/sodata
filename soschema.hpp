@@ -14,15 +14,17 @@ const column_spec users_columns[] =
 		 {"Reputation",     CT_INT},
 		 {"CreationDate",   CT_DATE},
 		 {"DisplayName",    CT_VCHR64}, // 32 would also be enough
-		 {"EmailHash",      CT_TEXT},
+		 {"EmailHash",      CT_TEXT}, // obsolete, now always blank
 		 {"LastAccessDate", CT_DATE},
 		 {"WebsiteUrl",     CT_TEXT},
 		 {"Location",       CT_TEXT},
-		 {"Age",            CT_INT},
 		 {"AboutMe",        CT_TEXT},
 		 {"Views",          CT_INT},
 		 {"UpVotes",        CT_INT},
 		 {"DownVotes",      CT_INT},
+		 {"ProfileImageUrl", CT_TEXT},
+		 {"Age",            CT_INT},
+		 {"AccountId",      CT_INT},
 		 {0}};
 const table_spec users_table = {"Users", users_columns};
 
@@ -31,6 +33,8 @@ const column_spec badges_columns[] =
 		 {"UserId",         CT_INT},
 		 {"Name",           CT_VCHR64},
 		 {"Date",           CT_DATE},
+		 {"Class",          CT_INT},
+		 {"TagBased",       CT_INT},
 		 {0}};
 const table_spec badges_table = {"Badges", badges_columns};
 
@@ -54,17 +58,18 @@ const column_spec posts_columns[] =
 		 {"ViewCount",      CT_INT},
 		 {"Body",           CT_TEXT},
 		 {"OwnerUserId",    CT_INT},
+		 {"OwnerDisplayName", CT_VCHR64},
 		 {"LastEditorUserId", CT_INT},
 		 {"LastEditorDisplayName", CT_VCHR64},
 		 {"LastEditDate",   CT_DATE},
 		 {"LastActivityDate", CT_DATE},
-		 {"CommunityOwnedDate", CT_DATE},
-		 {"ClosedDate",     CT_DATE},
 		 {"Title",          CT_TEXT},
 		 {"Tags",           CT_TEXT},
 		 {"AnswerCount",    CT_INT},
 		 {"CommentCount",   CT_INT},
 		 {"FavoriteCount",  CT_INT},
+		 {"ClosedDate",     CT_DATE},
+		 {"CommunityOwnedDate", CT_DATE},
 		 {0}};
 const table_spec posts_table = {"Posts", posts_columns};
 
@@ -75,6 +80,7 @@ const column_spec comments_columns[] =
 		 {"Text",           CT_TEXT},
 		 {"CreationDate",   CT_DATE},
 		 {"UserId",         CT_INT},
+		 {"UserDisplayName", CT_INT},
 		 {0}};
 const table_spec comments_table = {"Comments", comments_columns};
 
@@ -87,12 +93,30 @@ const column_spec posthistory_columns[] =
 		 {"UserId",         CT_INT},
 		 {"UserDisplayName",CT_VCHR64},
 		 {"Comment",        CT_TEXT},
-		 {"CloseReasonId",  CT_INT},
+		 {"CloseReasonId",  CT_INT}, // Does this still exist?
 		 {"Text",           CT_TEXT},
 		 {0}};
 const table_spec posthistory_table = {"PostHistory", posthistory_columns};
 
-const size_t table_count = 6;
+const column_spec postlinks_columns[] =
+		{{"Id",             CT_INT},
+		 {"CreationDate",   CT_DATE},
+		 {"PostId",         CT_INT},
+		 {"RelatedPostId",  CT_INT},
+		 {"LinkTypeId",     CT_INT},
+		 {0}};
+const table_spec postlinks_table = {"PostLinks", postlinks_columns};
+
+const column_spec tags_columns[] =
+		{{"Id",             CT_INT},
+		 {"TagName",        CT_VCHR64},
+		 {"Count",          CT_INT},
+		 {"ExcerptPostId",  CT_INT},
+		 {"WikiPostId",     CT_INT},
+		 {0}};
+const table_spec tags_table = {"Tags", tags_columns};
+
+const size_t table_count = 8;
 const table_spec tables[table_count] = {
 	users_table,
 	badges_table,
@@ -100,6 +124,8 @@ const table_spec tables[table_count] = {
 	posts_table,
 	comments_table,
 	posthistory_table,
+	postlinks_table,
+	tags_table,
 };
 
 const column_spec posttags_columns[] =

@@ -180,6 +180,8 @@ void import_tables(tablebuilder &builder) {
 		}
 
 		load_standard_table(builder, posthistory_table);
+		load_standard_table(builder, postlinks_table);
+		load_standard_table(builder, tags_table);
 	}
 	catch (const import_error &err) {
 		std::cerr << "ERROR: " <<  err.what() << std::endl;
