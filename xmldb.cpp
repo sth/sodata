@@ -22,10 +22,19 @@ void xmltable::load() {
 	XML_SetElementHandler(parser, &wrp_handle_element, 0);
 
 	std::ifstream f((name + ".xml").c_str());
+	if (!f) {
+		XML_ParserFree(parser);
+		throw import_error("cannot open file: " + name + ".xml");
+	}
 	char buffer[BLOCKSIZE];
 	do {
 		f.read(buffer, BLOCKSIZE);
-		XML_Parse(parser, buffer, f.gcount(), (f ? 0 : 1));
+		XML_Status rv = XML_Parse(parser, buffer, f.gcount(), (f ? 0 : 1));
+		if (rv == XML_STATUS_ERROR) {
+			XML_ParserFree(parser);
+			throw import_error("cannot parse input file: " + name + ".xml");
+			break;
+		}
 	} while (f);
 
 	XML_ParserFree(parser);

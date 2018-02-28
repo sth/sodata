@@ -165,21 +165,26 @@ void load_standard_table(tablebuilder &builder, const table_spec &table) {
 
 void import_tables(tablebuilder &builder) {
 	// import all tables
-	load_standard_table(builder, users_table);
-	load_standard_table(builder, badges_table);
-	load_standard_table(builder, votes_table);
-	load_standard_table(builder, comments_table);
+	try {
+		load_standard_table(builder, users_table);
+		load_standard_table(builder, badges_table);
+		load_standard_table(builder, votes_table);
+		load_standard_table(builder, comments_table);
 
-	sopostloader loader(builder, posts_table);
-	loader.load();
-	if (config.indexes) {
-		loader.add_indexes();
-	}
-	if (config.tags) {
-		loader.write_tags(tags_table);
-	}
+		sopostloader loader(builder, posts_table);
+		loader.load();
+		if (config.indexes) {
+			loader.add_indexes();
+		}
+		if (config.tags) {
+			loader.write_tags(tags_table);
+		}
 
-	load_standard_table(builder, posthistory_table);
+		load_standard_table(builder, posthistory_table);
+	}
+	catch (const import_error &err) {
+		std::cerr << "ERROR: " <<  err.what() << std::endl;
+	}
 }
 
 

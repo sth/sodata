@@ -6,6 +6,7 @@
 #include <expat.h>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 // ---------------------------------------------------------------------------
 // xmltable class
@@ -13,6 +14,11 @@
 // internal
 extern "C"
 void wrp_handle_element(void *data, const XML_Char *tag, const XML_Char **attrs);
+
+class import_error : public std::runtime_error {
+public:
+	using std::runtime_error::runtime_error;
+};
 
 class xmltable {
 protected:
