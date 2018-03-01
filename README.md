@@ -14,8 +14,11 @@ XML files.
 For more information about the data dumps and where to download them, see:
 
 - [Original Stack Overflow data dump announcement][2]
-- [Torrents with all the data on Clear Bits][3] 
+- [Data dump download page on archive.org][3]
 - [Other Stack Exchange blog posts anout the data dump][4]
+- [Explanation of database schema of the dump][5]
+- [Historic data dumps][6]
+
 
 If you just want to play around with the database a little without all the effort
 of downloading GBs of data and importing them into your own database, you might
@@ -129,8 +132,9 @@ that can be used in non-GPL programs.
 
  [1]: http://creativecommons.org/licenses/by-sa/3.0/
  [2]: http://blog.stackoverflow.com/2009/06/stack-overflow-creative-commons-data-dump/
- [3]: http://www.clearbits.net/creators/146-stack-exchange-data-dump
+ [3]: https://archive.org/details/stackexchange
  [4]: http://blog.stackexchange.com/category/cc-wiki-dump/
+ [5]: https://meta.stackexchange.com/questions/224873/all-stack-exchange-data-dumps
+ [6]: https://meta.stackexchange.com/questions/2677/database-schema-documentation-for-the-public-data-dump-and-sede
  [dbexplore]: http://data.stackexchange.com/
  [schema]: https://github.com/sth/sodata/blob/master/soschema.hpp
-
