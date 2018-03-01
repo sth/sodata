@@ -2,6 +2,7 @@
 #include <pqxx/strconv> // Needs including first
 #include "pgbuilder.hpp"
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 
 // ---------------------------------------------------------------------------
@@ -68,17 +69,29 @@ pgbuilder::pgbuilder(pqxx::connection &a_db)
 		: pgcommon(a_db), tablebuilder() {
 }
 
+std::string insert_stmt(const std::string &table, size_t count) {
+	if (!count) {
+		throw std::logic_error("cannot insert into table without columns");
+	}
+	std::ostringstream sql;
+	sql << "INSERT INTO " << table << " VALUES ($1";
+	for (size_t i = 1; i < count; ++i) {
+		sql << ", $" << i+1;
+	}
+	sql << ")";
+	return sql.str();
+}
+
 void pgbuilder::open_table(const table_spec &a_spec) {
 	pgcommon::open_table_impl(a_spec);
 
 	cur_row.resize(spec.columns().size());
+	cur_insert = std::string("insert_") + spec.name;
+	db.prepare(cur_insert, insert_stmt(spec.name, spec.columns().size()));
 	cur_work.reset(new pqxx::work(db));
-	cur_writer.reset(new pqxx::tablewriter(*cur_work, spec.name));
 }
 
 void pgbuilder::table_complete() {
-	cur_writer->complete();
-	cur_writer.reset();
 	cur_work->commit();
 	cur_work.reset();
 }
@@ -88,7 +101,11 @@ void pgbuilder::open_row() {
 }
 
 void pgbuilder::row_complete() {
-	cur_writer->push_back(cur_row.begin(), cur_row.end());
+	pqxx::prepare::invocation &&inv = cur_work->prepared(cur_insert);
+	for (auto str : cur_row) {
+		inv(str);
+	}
+	inv.exec();
 }
 
 void pgbuilder::add_column(const column_spec &col, const char *value) {

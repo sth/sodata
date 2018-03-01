@@ -26,7 +26,7 @@ class pgbuilder : private pgcommon, public tablebuilder {
 private:
 	std::vector<const char *> cur_row;
 	std::unique_ptr<pqxx::work> cur_work;
-	std::unique_ptr<pqxx::tablewriter> cur_writer;
+	std::string cur_insert;
 	int cur_idx;
 
 public:
