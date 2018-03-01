@@ -79,8 +79,8 @@ const column_spec comments_columns[] =
 		 {"Score",          CT_INT},
 		 {"Text",           CT_TEXT},
 		 {"CreationDate",   CT_DATE},
-		 {"UserId",         CT_INT},
 		 {"UserDisplayName", CT_VCHR64},
+		 {"UserId",         CT_INT},
 		 {0}};
 const table_spec comments_table = {"Comments", comments_columns};
 
