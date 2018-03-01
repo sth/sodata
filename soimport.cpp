@@ -162,6 +162,17 @@ void load_standard_table(tablebuilder &builder, const table_spec &table) {
 	}
 }
 
+void load_posts_table(tablebuilder &builder) {
+	sopostloader loader(builder, posts_table);
+	loader.load();
+	if (config.indexes) {
+		loader.add_indexes();
+	}
+	if (config.posttags) {
+		loader.write_posttags(posttags_table);
+	}
+}
+
 void import_tables(tablebuilder &builder) {
 	// import all tables
 	try {
@@ -169,16 +180,7 @@ void import_tables(tablebuilder &builder) {
 		load_standard_table(builder, badges_table);
 		load_standard_table(builder, votes_table);
 		load_standard_table(builder, comments_table);
-
-		sopostloader loader(builder, posts_table);
-		loader.load();
-		if (config.indexes) {
-			loader.add_indexes();
-		}
-		if (config.posttags) {
-			loader.write_posttags(posttags_table);
-		}
-
+		load_posts_table(builder);
 		load_standard_table(builder, posthistory_table);
 		load_standard_table(builder, postlinks_table);
 		load_standard_table(builder, tags_table);
