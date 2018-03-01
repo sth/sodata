@@ -155,6 +155,9 @@ void sopostloader::write_posttags(const table_spec &spec) {
 // utility functions
 
 void load_standard_table(tablebuilder &builder, const table_spec &table) {
+	if (!config.only.empty() && config.only != table.name) {
+		return;
+	}
 	soloader loader(builder, table);
 	loader.load();
 	if (config.indexes) {
@@ -163,6 +166,9 @@ void load_standard_table(tablebuilder &builder, const table_spec &table) {
 }
 
 void load_posts_table(tablebuilder &builder) {
+	if (!config.only.empty() && config.only != posts_table.name) {
+		return;
+	}
 	sopostloader loader(builder, posts_table);
 	loader.load();
 	if (config.indexes) {
@@ -207,7 +213,8 @@ void parse_config(configset_t cs, int argc, char **argv) {
 					"Options:" << std::endl <<
 					"  -h           Display this help message" << std::endl <<
 					"  -I           Don't add indexes" << std::endl <<
-					"  -T           Don't add a post tags table" << std::endl;
+					"  -T           Don't add a post tags table" << std::endl <<
+					"  -o TABLE     Only process this table" << std::endl;
 			switch (cs) {
 			case CS_PG:
 				std::cout <<
@@ -232,6 +239,13 @@ void parse_config(configset_t cs, int argc, char **argv) {
 		}
 		else if (strcmp("-T", argv[i]) == 0) {
 			config.posttags = false;
+		}
+		else if (strcmp("-o", argv[i]) == 0) {
+			if (i+1 >= argc) {
+				std::cerr << "missing argument after '-o'" << std::endl;
+				exit(1);
+			}
+			config.only = argv[++i];
 		}
 		else if (strcmp("-s", argv[i]) == 0) {
 			config.simple = true;
