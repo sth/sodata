@@ -78,7 +78,7 @@ can be used to specify a target directory, by default the current working
 directory is used.
 
 The resulting CSV files use escaping as understood by PostgreSQL. This means
-that the characters `\\` (backslash), `\n` (newline), `\r` (carrige retrun),
+that the characters `\\` (backslash), `\n` (newline), `\r` (carriage return),
 and `,` (comma) will be escaped by a preceding backslash when they occur in
 a text field. NULL values will be represented by `\\N` (a backslash character
 followed by a capital N).
