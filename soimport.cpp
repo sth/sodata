@@ -96,7 +96,7 @@ void sopostloader::add_column(const column_spec &col, const char *value) {
 	else if (plidx_cur == plidx_posttypeid) {
 		pl_curposttype = atoi(value);
 	}
-	else if (config.posttags && (plidx_cur == plidx_tags) && (pl_curposttype == 1)) {
+	else if ((plidx_cur == plidx_tags) && (pl_curposttype == 1)) {
 		std::string tname(value);
 		size_t s, e;
 		s = 0;
@@ -174,9 +174,7 @@ void load_posts_table(tablebuilder &builder) {
 	if (config.indexes) {
 		loader.add_indexes();
 	}
-	if (config.posttags) {
-		loader.write_posttags(posttags_table);
-	}
+	loader.write_posttags(posttags_table);
 }
 
 void import_tables(tablebuilder &builder) {
@@ -186,7 +184,10 @@ void import_tables(tablebuilder &builder) {
 		load_standard_table(builder, badges_table);
 		load_standard_table(builder, votes_table);
 		load_standard_table(builder, comments_table);
-		load_posts_table(builder);
+		if (config.posttags)
+			load_posts_table(builder);
+		else
+			load_standard_table(builder, posts_table);
 		load_standard_table(builder, posthistory_table);
 		load_standard_table(builder, postlinks_table);
 		load_standard_table(builder, tags_table);
