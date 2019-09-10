@@ -14,8 +14,12 @@ headers to build them. For compilation also a C++ compiler is necessary.
 Build
 =====
 
-Recommended is to build with scons.
-Build all:
+Build with `cmake`, `scons` or plain `make`.
+
+The CMake build compiles `sqliteimport` and `pgimport` only if the necesary libraries/header
+can be found and skips them otherwise.
+
+Build all with scons:
   $ scons
 
 Build just one target:

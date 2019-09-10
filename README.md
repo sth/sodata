@@ -96,7 +96,9 @@ those tables correspond to the attribute names in the XML. For more detail
 see [`soschema.hpp`][schema], which defines the tables and columns that get
 imported.
 
-## Compiling
+## Compilation
+
+### Dependencies
 
 All programs use `libexpat` to parse the input files, it and it's header files
 have to be available.
@@ -115,7 +117,25 @@ header files:
 
     sudo apt install libpqxx-4.0 libpqxx-dev
 
-To build all tools, simply type:
+Your distribution might also have newer version of libpqxx, for example:
+
+    sudo apt install libpqxx-6.2 libpqxx-dev
+
+(Tested with libpqxx-4.0 and libpqxx-6.2)
+
+### Compilation
+
+You can compile the tools with CMake:
+
+   mkdir build
+	cd build
+	cmake ..
+	make
+
+This tries to build everything, but skips tools if the dependencies for sqlite/postgres
+cannot be found.
+
+Plain `make` also works if the dependencies are in the default paths:
 
     make
 
