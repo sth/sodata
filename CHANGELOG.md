@@ -3,11 +3,10 @@
 <a name="master"></a>
 ## [HEAD](https://github.com//sth/sodata/tree/master) (unreleased) ([diff](https://github.com/sth/sodata/compare/v2.2...master))
 
-- Added changelog
-
 <a name="v2.2"></a>
 ## [v2.2](https://github.com//sth/sodata/tree/v2.2) (2019-09-11) ([diff](https://github.com/sth/sodata/compare/v2.1...v2.2))
 
+- **Meta:** Added changelog
 - **Feature:** Add CMake support
 - **Change:** Compile with C++11
 - **Bugfix:** Fix compilation with libpqxx-6.2
