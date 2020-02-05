@@ -230,6 +230,7 @@ void parse_config(configset_t cs, int argc, char **argv) {
 			case CS_CSV:
 				std::cout <<
 					"  -d DIRNAME   Put output CSV files in this directory [.]" << std::endl;
+				break;
 			default:
 				assert(0);
 			}
