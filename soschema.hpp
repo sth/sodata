@@ -136,7 +136,7 @@ const std::vector<column_spec> posttags_columns =
 		};
 const table_spec posttags_table = {"PostTags", posttags_columns};
 
-} // namepace
+} // namespace
 
 #endif // SOSCHEMA_HPP_INCLUDED
 
