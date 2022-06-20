@@ -135,16 +135,6 @@ You can compile the tools with CMake:
 This tries to build everything, but skips tools if the dependencies for sqlite/postgres
 cannot be found.
 
-Plain `make` also works if the dependencies are in the default paths:
-
-    make
-
-You can also compile the tools individually:
-
-    make sqliteimport
-    make pgimport
-    make csvimport
-
 ## License
 
 Licensed under LGPL. This allows the creation of a library from this code
