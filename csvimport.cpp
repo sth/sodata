@@ -5,7 +5,7 @@
 #include "csvbuilder.hpp"
 #include "soschema.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
 	parse_config(CS_CSV, argc, argv);
 
 	if (config.dir.empty()) {
@@ -14,5 +14,6 @@ int main(int argc, char *argv[]) {
 
 	csvbuilder builder(config.dir);
 	import_tables(builder);
+	return 0;
 }
 

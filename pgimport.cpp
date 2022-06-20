@@ -38,7 +38,7 @@ std::string absolute(const std::string &relpath) {
 // ---------------------------------------------------------------------------
 // main
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
 	parse_config(CS_PG, argc, argv);
 
 	pqxx::connection db(config.connect);

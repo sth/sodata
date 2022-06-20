@@ -43,7 +43,7 @@ enum configset_t {
 	CS_CSV,
 };
 
-void parse_config(configset_t cs, int argc, char **argv);
+void parse_config(configset_t cs, int argc, const char **argv);
 void import_tables(tablebuilder &builder);
 
 #endif // SOIMPORT_HPP_INCLUDED

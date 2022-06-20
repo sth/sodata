@@ -203,7 +203,7 @@ void import_tables(tablebuilder &builder) {
 
 config_t config;
 
-void parse_config(configset_t cs, int argc, char **argv) {
+void parse_config(configset_t cs, int argc, const char **argv) {
 	config.dir = "."; // default
 	for (int i = 1; i < argc; i++) {
 		if      (strcmp("-h", argv[i]) == 0) {
