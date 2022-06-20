@@ -101,6 +101,13 @@ void pgbuilder::open_row() {
 }
 
 void pgbuilder::row_complete() {
+	// This usage of `prepared` is deprecated. We should use `exec_prepared` and pass all
+	// the parameters as template parameters.
+	//
+	// But we don't know the number of parameters. And the same pgbuilder is used to
+	// build multiple tables, which need a different number of parameters. So we don't know
+	// the required number of parameters statically and cannot create a corresponding call
+	// with the required parameters.
 	pqxx::prepare::invocation &&inv = cur_work->prepared(cur_insert);
 	for (auto str : cur_row) {
 		inv(str);
