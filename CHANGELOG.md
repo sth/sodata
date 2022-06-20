@@ -3,6 +3,8 @@
 <a name="master"></a>
 ## [master](https://github.com/sth/sodata/tree/master), ([compare to v2.2](https://github.com/sth/sodata/compare/v2.2...master))
 
+- **Internal:** Use `std::vector` in `table_spec` data structure
+- **Meta:** Only build with CMake, remove support for SCons and plain make
 - **Bugfix:** Fix command line option parsing for csvimport 
 
 <a name="v2.2"></a>

@@ -3,6 +3,12 @@
 <a name="master"></a>
 ## [master](https://github.com/sth/sodata/tree/master), ([compare to v2.2](https://github.com/sth/sodata/compare/v2.2...master))
 
+* Add comment to deprecated API usage ([030fc8c](https://github.com/sth/sodata/commit/030fc8ceba1800906819b75dc24bbb5857f4b595))
+* Use more standard way to set C++ standard version ([8397c11](https://github.com/sth/sodata/commit/8397c11039d0b6d3159c5897f83d2a62979ff0d9))
+* Use vectors instead of zero-terminated arrays ([e5af1e4](https://github.com/sth/sodata/commit/e5af1e4aae213dd2e23318b3635da359703bc4b6))
+* Store only tablename instead of full table_spec ([d540014](https://github.com/sth/sodata/commit/d5400141959063addbee547cf8b54333aeddb935))
+* Remove make and SCons build ([70ef290](https://github.com/sth/sodata/commit/70ef2905ff9032dec51bc6c718a16c582bd37a5c))
+* Move changelog helpers to .chglog/ ([4fdf534](https://github.com/sth/sodata/commit/4fdf5346fd310effd7a2f0b6a27b0cd4cc63a3b3))
 * Improve changelog ([594e2bb](https://github.com/sth/sodata/commit/594e2bbab64f88ae6aee5f220adba8b3970d6f64))
 * Fix printing of help for csvimport ([f4aee8a](https://github.com/sth/sodata/commit/f4aee8a17bd92afd3d8aa8e2aeb4e2b756cfee22))
 * Fix some trivial syntax problems ([58b2ebc](https://github.com/sth/sodata/commit/58b2ebcc20f847f60b1a1651b6aee215da3a3a74))
