@@ -25,8 +25,8 @@ void pgcommon::open_table_impl(const table_spec &spec) {
 	}
 
 	std::string create = std::string("CREATE TABLE " )+ spec.name + " (";
-	std::vector<column_spec> columns = spec.columns();
-	for (std::vector<column_spec>::iterator it = columns.begin(); it != columns.end(); ++it) {
+	const std::vector<column_spec> &columns = spec.columns;
+	for (auto it = columns.begin(); it != columns.end(); ++it) {
 		create += std::string(it->name) + " ";
 		switch (it->type) {
 		case CT_VCHR64:
@@ -85,9 +85,9 @@ std::string insert_stmt(const std::string &table, size_t count) {
 void pgbuilder::open_table(const table_spec &spec) {
 	pgcommon::open_table_impl(spec);
 
-	cur_row.resize(spec.columns().size());
+	cur_row.resize(spec.columns.size());
 	cur_insert = std::string("insert_") + spec.name;
-	db.prepare(cur_insert, insert_stmt(spec.name, spec.columns().size()));
+	db.prepare(cur_insert, insert_stmt(spec.name, spec.columns.size()));
 	cur_work.reset(new pqxx::work(db));
 }
 

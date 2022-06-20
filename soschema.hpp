@@ -4,12 +4,14 @@
 
 #include "dbspec.hpp"
 
+#include <vector>
+
 // ---------------------------------------------------------------------------
 // Table specifications
 
 namespace {
 
-const column_spec users_columns[] =
+const std::vector<column_spec> users_columns =
 		{{"Id",             CT_INT},
 		 {"Reputation",     CT_INT},
 		 {"CreationDate",   CT_DATE},
@@ -25,30 +27,30 @@ const column_spec users_columns[] =
 		 {"ProfileImageUrl", CT_TEXT},
 		 {"Age",            CT_INT},
 		 {"AccountId",      CT_INT},
-		 {0}};
+		};
 const table_spec users_table = {"Users", users_columns};
 
-const column_spec badges_columns[] =
+const std::vector<column_spec> badges_columns =
 		{{"Id",             CT_INT},
 		 {"UserId",         CT_INT},
 		 {"Name",           CT_VCHR64},
 		 {"Date",           CT_DATE},
 		 {"Class",          CT_INT},
 		 {"TagBased",       CT_BOOL},
-		 {0}};
+		};
 const table_spec badges_table = {"Badges", badges_columns};
 
-const column_spec votes_columns[] =
+const std::vector<column_spec> votes_columns =
 		{{"Id",             CT_INT},
 		 {"PostId",         CT_INT},
 		 {"VoteTypeId",     CT_INT},
 		 {"UserId",         CT_INT},
 		 {"CreationDate",   CT_DATE},
 		 {"BountyAmount",   CT_INT},
-		 {0}};
+		};
 const table_spec votes_table = {"Votes", votes_columns};
 
-const column_spec posts_columns[] =
+const std::vector<column_spec> posts_columns =
 		{{"Id",             CT_INT},
 		 {"PostTypeId",     CT_INT},
 		 {"ParentId",       CT_INT},
@@ -70,10 +72,10 @@ const column_spec posts_columns[] =
 		 {"FavoriteCount",  CT_INT},
 		 {"ClosedDate",     CT_DATE},
 		 {"CommunityOwnedDate", CT_DATE},
-		 {0}};
+		};
 const table_spec posts_table = {"Posts", posts_columns};
 
-const column_spec comments_columns[] =
+const std::vector<column_spec> comments_columns =
 		{{"Id",             CT_INT},
 		 {"PostId",         CT_INT},
 		 {"Score",          CT_INT},
@@ -81,10 +83,10 @@ const column_spec comments_columns[] =
 		 {"CreationDate",   CT_DATE},
 		 {"UserDisplayName", CT_VCHR64},
 		 {"UserId",         CT_INT},
-		 {0}};
+		};
 const table_spec comments_table = {"Comments", comments_columns};
 
-const column_spec posthistory_columns[] =
+const std::vector<column_spec> posthistory_columns =
 		{{"Id",             CT_INT},
 		 {"PostHistoryTypeId", CT_INT},
 		 {"PostId",         CT_INT},
@@ -95,25 +97,25 @@ const column_spec posthistory_columns[] =
 		 {"Comment",        CT_TEXT},
 		 {"CloseReasonId",  CT_INT}, // Does this still exist?
 		 {"Text",           CT_TEXT},
-		 {0}};
+		};
 const table_spec posthistory_table = {"PostHistory", posthistory_columns};
 
-const column_spec postlinks_columns[] =
+const std::vector<column_spec> postlinks_columns =
 		{{"Id",             CT_INT},
 		 {"CreationDate",   CT_DATE},
 		 {"PostId",         CT_INT},
 		 {"RelatedPostId",  CT_INT},
 		 {"LinkTypeId",     CT_INT},
-		 {0}};
+		};
 const table_spec postlinks_table = {"PostLinks", postlinks_columns};
 
-const column_spec tags_columns[] =
+const std::vector<column_spec> tags_columns =
 		{{"Id",             CT_INT},
 		 {"TagName",        CT_VCHR64},
 		 {"Count",          CT_INT},
 		 {"ExcerptPostId",  CT_INT},
 		 {"WikiPostId",     CT_INT},
-		 {0}};
+		};
 const table_spec tags_table = {"Tags", tags_columns};
 
 const size_t table_count = 8;
@@ -128,10 +130,10 @@ const table_spec tables[table_count] = {
 	tags_table,
 };
 
-const column_spec posttags_columns[] =
+const std::vector<column_spec> posttags_columns =
 		{{"PostId",         CT_INT},
 		 {"Name",           CT_VCHR64},
-		 {0}};
+		};
 const table_spec posttags_table = {"PostTags", posttags_columns};
 
 } // namepace

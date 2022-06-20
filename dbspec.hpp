@@ -22,8 +22,7 @@ struct column_spec {
 
 struct table_spec {
 	const char *name;
-	const column_spec *column_defs;
-	std::vector<column_spec> columns() const;
+	const std::vector<column_spec> columns;
 	std::vector<std::string> column_names() const;
 	size_t column_index(const std::string &name) const;
 };

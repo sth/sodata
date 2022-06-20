@@ -12,7 +12,7 @@
 // soloader class
 
 soloader::soloader(tablebuilder &a_builder, const table_spec &a_table)
-		: xmltable(a_table.name, a_table.columns()),
+		: xmltable(a_table.name, a_table.columns),
 		  builder(a_builder), table(a_table) {
 }
 
@@ -36,8 +36,8 @@ void soloader::row_complete() {
 }
 
 void soloader::add_indexes() {
-	const column_spec *columns = table.column_defs;
-	for (size_t idx=0; columns[idx].name; idx++) {
+	const std::vector<column_spec> &columns = table.columns;
+	for (size_t idx=0; idx < columns.size(); idx++) {
 		switch (columns[idx].type) {
 		case CT_INT:
 		case CT_DATE:
@@ -129,7 +129,7 @@ public:
 
 void sopostloader::write_posttags(const table_spec &spec) {
 	std::cout << "building " << spec.name << std::endl;
-	std::vector<column_spec> columns = spec.columns();
+	const std::vector<column_spec> &columns = spec.columns;
 	builder.open_table(spec);
 	int counter(0);
 	for (posttags_t::iterator it = posttags.begin(); it != posttags.end(); ++it) {
