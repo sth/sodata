@@ -118,8 +118,7 @@ const std::vector<column_spec> tags_columns =
 		};
 const table_spec tags_table = {"Tags", tags_columns};
 
-const size_t table_count = 8;
-const table_spec tables[table_count] = {
+const std::vector<table_spec> tables = {
 	users_table,
 	badges_table,
 	votes_table,
