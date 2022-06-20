@@ -22,7 +22,7 @@ public:
 	virtual void add_column(const column_spec &spec, const char *value);
 
 protected:
-	std::string filename(const table_spec &spec) const;
+	std::string filename(const std::string &tablename) const;
 
 private:
 	template<typename T>

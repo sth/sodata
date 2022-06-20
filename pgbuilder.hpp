@@ -14,7 +14,7 @@
 class pgcommon {
 protected:
 	pqxx::connection &db;
-	table_spec spec;
+	std::string tablename;
 
 	pgcommon(pqxx::connection &db);
 	void add_index_impl(const std::string &column);

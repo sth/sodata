@@ -21,12 +21,12 @@ csvbuilder::csvbuilder(const std::string &a_outdir)
 		: outdir(a_outdir), csv(), first_column(true) {
 }
 
-std::string csvbuilder::filename(const table_spec &spec) const {
-	return outdir + "/" + spec.name + ".csv";
+std::string csvbuilder::filename(const std::string &tablename) const {
+	return outdir + "/" + tablename + ".csv";
 }
 
 void csvbuilder::open_table(const table_spec &spec) {
-	csv.open(filename(spec).c_str());
+	csv.open(filename(spec.name).c_str());
 }
 
 void csvbuilder::table_complete() {

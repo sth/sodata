@@ -9,11 +9,11 @@
 // pgcommon
 
 pgcommon::pgcommon(pqxx::connection &a_db)
-		: db(a_db), spec() {
+		: db(a_db), tablename() {
 }
 
-void pgcommon::open_table_impl(const table_spec &a_spec) {
-	spec = a_spec;
+void pgcommon::open_table_impl(const table_spec &spec) {
+	tablename = spec.name;
 
 	try {
 		pqxx::work w(db);
@@ -58,7 +58,7 @@ void pgcommon::open_table_impl(const table_spec &a_spec) {
 
 void pgcommon::add_index_impl(const std::string &column) {
 	pqxx::work w(db);
-	w.exec(std::string("CREATE INDEX ") + spec.name + "_" + column + " ON " + spec.name + " (" + column + ");");
+	w.exec(std::string("CREATE INDEX ") + tablename + "_" + column + " ON " + tablename + " (" + column + ");");
 	w.commit();
 }
 
@@ -82,8 +82,8 @@ std::string insert_stmt(const std::string &table, size_t count) {
 	return sql.str();
 }
 
-void pgbuilder::open_table(const table_spec &a_spec) {
-	pgcommon::open_table_impl(a_spec);
+void pgbuilder::open_table(const table_spec &spec) {
+	pgcommon::open_table_impl(spec);
 
 	cur_row.resize(spec.columns().size());
 	cur_insert = std::string("insert_") + spec.name;
@@ -134,9 +134,9 @@ void pgcopybuilder::table_complete() {
 	csvbuilder::table_complete();
 	std::cout << "  (pushing to db...)" << std::endl;
 	pqxx::work w(db);
-	w.exec(std::string("COPY ") + spec.name + " FROM '" + filename(spec) + "' WITH DELIMITER AS ',';");
+	w.exec(std::string("COPY ") + tablename + " FROM '" + filename(tablename) + "' WITH DELIMITER AS ',';");
 	w.commit();
-	unlink(filename(spec).c_str());
+	unlink(filename(tablename).c_str());
 }
 
 void pgcopybuilder::add_index(const std::string &column) {
