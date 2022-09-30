@@ -29,6 +29,9 @@ void pgcommon::open_table_impl(const table_spec &spec) {
 	for (auto it = columns.begin(); it != columns.end(); ++it) {
 		create += std::string(it->name) + " ";
 		switch (it->type) {
+		case CT_VCHR12:
+			create += "varchar(12)";
+			break;
 		case CT_VCHR64:
 			create += "varchar(64)";
 			break;

@@ -145,6 +145,7 @@ void sqlitebuilder::add_column(const column_spec &col, const char *value) {
 		return;
 	}
 	switch (col.type) {
+	case CT_VCHR12:
 	case CT_VCHR64:
 	case CT_TEXT:
 		add_column_tmpl(value);

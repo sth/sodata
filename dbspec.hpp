@@ -8,6 +8,7 @@
 #include <vector>
 
 enum column_type_t {
+	CT_VCHR12,
 	CT_VCHR64,
 	CT_TEXT,
 	CT_INT,

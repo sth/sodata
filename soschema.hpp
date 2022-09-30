@@ -72,6 +72,7 @@ const std::vector<column_spec> posts_columns =
 		 {"FavoriteCount",  CT_INT},
 		 {"ClosedDate",     CT_DATE},
 		 {"CommunityOwnedDate", CT_DATE},
+		 {"ContentLicense", CT_VCHR12},
 		};
 const table_spec posts_table = {"Posts", posts_columns};
 
@@ -83,6 +84,7 @@ const std::vector<column_spec> comments_columns =
 		 {"CreationDate",   CT_DATE},
 		 {"UserDisplayName", CT_VCHR64},
 		 {"UserId",         CT_INT},
+		 {"ContentLicense", CT_VCHR12},
 		};
 const table_spec comments_table = {"Comments", comments_columns};
 
@@ -97,6 +99,7 @@ const std::vector<column_spec> posthistory_columns =
 		 {"Comment",        CT_TEXT},
 		 {"CloseReasonId",  CT_INT}, // Does this still exist?
 		 {"Text",           CT_TEXT},
+		 {"ContentLicense", CT_VCHR12},
 		};
 const table_spec posthistory_table = {"PostHistory", posthistory_columns};
 
